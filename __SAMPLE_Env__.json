@@ -1,0 +1,11 @@
+{
+    "ScaleUnitSetupPath":"K:/Axxon/CommerceSDK/CommerceStoreScaleUnitSetup.10.0.28.exe",
+    "HttpPort": "446",
+    "Thumbprint": "",
+    "RetailServerAadClientId": "",
+    "RetailServerAadResourceId": "api://",
+    "CposAadClientId": "",
+    "AsyncClientAadClientId": "",
+    "ChannelConfig":"",
+    "RetailServerURL":""
+}
