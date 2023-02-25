@@ -7,6 +7,7 @@ param (
     [ValidateNotNullOrEmpty()]$jsonFile
 )
 
+.\CheckJsonFile.ps1 $jsonFile
 .\CheckD365foConfigDependency.ps1 $jsonFile
 .\CheckRegeditEntriesDependency.ps1
 .\CheckNetCoreBundleDependency.ps1
