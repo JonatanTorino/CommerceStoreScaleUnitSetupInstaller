@@ -29,9 +29,14 @@ $RetailServerAadResourceId=$json.RetailServerAadResourceId
 $CposAadClientId=$json.CposAadClientId
 $AsyncClientAadClientId=$json.AsyncClientAadClientId
 $config=$json.ChannelConfig
+$IntervalAsyncClient=$json.IntervalAsyncClient
 
-Start-Process -FilePath $ScaleUnitSetupPath -Wait -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"
-
-.\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
-.\ChangeAsyncInterval.ps1 00:01:00
-.\ChangeIISWebSitesPath.ps1
+#Los parametros -Wait -PassThru son para el flujo del script
+$process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"
+$process.WaitForExit()
+if ($process.ExitCode -eq 0)
+{
+    .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
+    .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
+    .\ChangeIISWebSitesPath.ps1
+}
