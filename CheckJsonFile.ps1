@@ -50,9 +50,9 @@ $AsyncClientAppInsightsInstrumentationKey = Select-Xml -Xml $ChannelConfigXml -X
 $CloudPosAppInsightsInstrumentationKey = Select-Xml -Xml $ChannelConfigXml -XPath $xPathCloudPosAppInsightsInstrumentationKey
 $RetailServerAppInsightsInstrumentationKey = Select-Xml -Xml $ChannelConfigXml -XPath $xPathRetailServerAppInsightsInstrumentationKey
 
-if ($null -eq $AsyncClientAppInsightsInstrumentationKey.InnerText -Or 
-    $null -eq $CloudPosAppInsightsInstrumentationKey.InnerText -Or 
-    $null -eq $RetailServerAppInsightsInstrumentationKey.InnerText)
+if ($null -eq $AsyncClientAppInsightsInstrumentationKey.Node.Value -Or 
+    $null -eq $CloudPosAppInsightsInstrumentationKey.Node.Value -Or 
+    $null -eq $RetailServerAppInsightsInstrumentationKey.Node.Value)
 {
     throw "El archivo $ChannelConfig tiene AppInsightsInstrumentationKey faltantes."
 }
