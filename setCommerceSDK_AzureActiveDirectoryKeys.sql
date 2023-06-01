@@ -26,17 +26,16 @@ END
 set @TenantId = @parmInTenantId
 ----------------------------------------------------------------
 declare @UserId nvarchar(20) = 'RetailServiceAccount'
-declare @AadClientIds table (
-    ClientId nvarchar(38) NULL,
-    [Name] nvarchar(100) NULL,
-    UserId nvarchar(20) NULL
-)
-insert into @AadClientIds (ClientId, [Name], UserId) values (@parmInAadAsyncClientId, @cmmNameAsync, @UserId)
-insert into @AadClientIds (ClientId, [Name], UserId) values (@parmInAadPOSId, @cmmNamePos, @UserId)
-insert into @AadClientIds (ClientId, [Name], UserId) values (@parmInAadRetailServerId, @cmmNameRetailServer, @UserId)
------------------------------------------------------------------------------
+
 MERGE AxDB.dbo.SysAADClientTable AS destino
-USING @AadClientIds AS origen
+USING (
+    SELECT ClientId, [Name], UserId FROM (
+        VALUES 
+            (@parmInAadAsyncClientId, @cmmNameAsync, @UserId),
+            (@parmInAadPOSId, @cmmNamePos, @UserId),
+            (@parmInAadRetailServerId, @cmmNameRetailServer, @UserId)
+    ) AS subquery (ClientId, [Name], UserId)
+) AS origen
 ON (destino.AADCLIENTID = origen.ClientId) -- Condición de combinación
 
 -- Si hay una coincidencia, actualiza los valores
