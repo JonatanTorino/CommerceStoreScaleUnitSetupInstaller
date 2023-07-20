@@ -1,5 +1,7 @@
 #Ignoro la carpeta de archivos de configuración para no llevar control de versión de archivos propios de cada entorno.
 ConfigFiles/*
+.vs/
+
 #Excepto el archivo 
 !ConfigFiles/SAMPLE_Config_By_Env_(DuplicateAndRename).json
 
