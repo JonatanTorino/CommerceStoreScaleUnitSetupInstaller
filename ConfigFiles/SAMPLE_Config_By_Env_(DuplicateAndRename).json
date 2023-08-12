@@ -1,12 +1,12 @@
 {
-    "ScaleUnitSetupPath":"K:\\Axxon\\CommerceSDK\\CommerceStoreScaleUnitSetup.10.0.28.exe",
+    "ChannelConfig":"K:\\Axxon\\GitHub.JonatanTorino\\CommerceStoreScaleUnitSetupInstaller\\ConfigFiles\\CommerceSDK_20230411.xml",
+    "ScaleUnitSetupPath":"K:\\Axxon\\GitHub.JonatanTorino\\CommerceStoreScaleUnitSetupInstaller\\CommerceStoreScaleUnitSetup.10.0.28.exe",
     "HttpPort": "446",
     "Thumbprint": "",
     "RetailServerAadClientId": "",
     "RetailServerAadResourceId": "api://",
     "CposAadClientId": "",
     "AsyncClientAadClientId": "",
-    "ChannelConfig":"K:\\Axxon\\CommerceSDK\\ChannelDatabase_CommerceSDK_V9352210211.xml",
     "RetailServerURL":"",
     "IntervalAsyncClient": "00:01:00"
 }

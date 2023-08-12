@@ -5,3 +5,5 @@ ConfigFiles/*
 
 #vscode files
 .vscode/
+*.exe
+/.vs
