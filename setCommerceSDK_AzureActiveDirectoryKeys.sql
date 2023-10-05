@@ -10,16 +10,28 @@ declare @parmInAadPOSId nvarchar(38) = N'$(AadPOSId)'
 declare @parmInAadRetailServerId nvarchar(38) = N'$(AadRetailServerId)'
 declare @parmInAadAsyncClientId nvarchar(38) = N'$(AadAsyncClientId)'
 declare @parmInTenantId nvarchar(255) = N'$(TenantId)'
-select @parmInAadPOSId parmInAadPOSId, @parmInAadRetailServerId parmInAadRetailServerId
-, @parmInAadAsyncClientId parmInAadAsyncClientId, @parmInTenantId parmInTenantId
+declare @parmInStoreSystemChannelDatabaseId nvarchar(255) = N'$(StoreSystemChannelDatabaseId)'
+select @parmInAadPOSId parmInAadPOSId, @parmInAadRetailServerId parmInAadRetailServerId, @parmInAadAsyncClientId parmInAadAsyncClientId
+, @parmInTenantId parmInTenantId, @parmInStoreSystemChannelDatabaseId parmInStoreSystemChannelDatabaseId
 -----------------------------------------------------------------------------
 declare @cmmNameAsync nvarchar(100) = 'CmmSDK-AsyncClient'
 declare @cmmNamePos nvarchar(100) = 'CmmSDK-POS'
 declare @cmmNameRetailServer nvarchar(100) = 'CmmSDK-RetailServer'
------------------------------------------------------------------------------
+---------------------------------------------------------------------
+IF (SELECT COUNT(1) FROM AxDB.dbo.RetailConnDatabaseProfile 
+    WHERE [Name] = @parmInStoreSystemChannelDatabaseId) = 0
+BEGIN
+    declare @RetailCDXDataGroup_RecId bigint
+    select @RetailCDXDataGroup_RecId = RecID from AxDB.dbo.RetailCDXDataGroup where [Name] = 'Default'
+    INSERT INTO AxDB.dbo.RetailConnDatabaseProfile
+            ([Name], [DataGroup])
+    VALUES (@parmInStoreSystemChannelDatabaseId, @RetailCDXDataGroup_RecId)
+END
+---------------------------------------------------------------------
 declare @TenantId nvarchar(255) = N'$(TenantId)'
 select @TenantId = TENANTID from AxDB.dbo.RETAILSHAREDPARAMETERS
-IF ((ISNULL(@TenantId, '') = '') OR @TenantId <> @parmInTenantId)AND (SELECT COUNT(1) FROM AxDB.dbo.RETAILSHAREDPARAMETERS) = 1
+IF ((ISNULL(@TenantId, '') = '') OR @TenantId <> @parmInTenantId) 
+    AND (SELECT COUNT(1) FROM AxDB.dbo.RETAILSHAREDPARAMETERS) = 1
 BEGIN
 	update AxDB.dbo.RETAILSHAREDPARAMETERS set TenantId = @parmInTenantId
 END

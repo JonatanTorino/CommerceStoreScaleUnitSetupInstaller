@@ -20,8 +20,10 @@ $config=$json.ChannelConfig
 
 #Obtento el TenantId del archivo ChannelConfig referenciado en el json de configuración
 [xml]$configXml = Get-Content $config
-$xPath = "/configuration/appSettings/add[@key='TenantId']/@value"
-$TenantId = Select-Xml -Xml $configXml -XPath $xPath 
+$xPathTenantId = "/configuration/appSettings/add[@key='TenantId']/@value"
+$TenantId = Select-Xml -Xml $configXml -XPath $xPathTenantId 
+$xPathStoreSystemChannelDatabaseId = "/configuration/appSettings/add[@key='StoreSystemChannelDatabaseId']/@value"
+$StoreSystemChannelDatabaseId = Select-Xml -Xml $configXml -XPath $xPathStoreSystemChannelDatabaseId 
 
 #Inicializo cada variable del json
 [string]$RetailServerAadClientId=$json.RetailServerAadClientId
@@ -33,7 +35,7 @@ $rutaScriptSQL = '.\setCommerceSDK_AzureActiveDirectoryKeys.sql'
 
 try {
     # Ejecutar el script SQL
-    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId
+    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId
 }
 catch {
     Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"
