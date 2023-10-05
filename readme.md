@@ -13,14 +13,26 @@ Descripción de cada script en orden de ejecución:
 **InstallScaleUnit.ps1**
 Este script invoca a los demás scripts en el orden necesario para la instalación, invocando a scripts que realizan chequeos de dependencias para la instalación, así como a otros posteriores que ajustan valores que vienen por defecto en la instalación.
 
-**CheckD365foConfigDependency.ps1**
+**CheckJsonFile.ps1**
+Se controla que el archivo json con los parámetros de instalación tenga todos los datos necesarios para continuar.
+
+**InsertCmmSDKAzureActiveClientId.ps1**
+Toma el archivo de configuracion json para usar los parámetros para insertar en las tablas de la DB de D365FO.
+
+**setCommerceSDK_AzureActiveDirectoryKeys.sql**
+Script de SQL para ejecutar insert de los datos tomados del archivo de configuración json.
+
+~~**CheckD365foConfigDependency.ps1****~~ [Discontinuado]
 Asiste con la configuración requerida en D365FO, la cual se debe agregar de forma manual en la aplicación.
 
 **CheckRegeditEntriesDependency.ps1**
 Ajustas las claves del regedit para el uso de TLS.
 
-**CheckNetCoreBundleDependency.ps1**
+~~**CheckNetCoreBundleDependency.ps1**~~ [Discontinuado]
 Busca si están instaladas dependencias requeridas, si no las encuentra las descarga e instala. NO está implementado el modo silencioso de instalación.
+
+**CheckAdnDownload.ps1**
+Se le pasan dos parámetros, el nombre de un componente para buscar si está instalado y la URL para descargarlo en caso de que no se encuentre. Tiene implementado la instalación en modo silencioso en caso de descargar un MSI.
 
 **ChangePosConfig.ps1**
 La instalación del CSU crea un WebSite RSSU sin URLs públicas.
