@@ -6,6 +6,7 @@ param (
     [string]
     [ValidateNotNullOrEmpty()]$jsonFile
 )
+choco install powershell-core -y
 
 .\CheckJsonFile.ps1 $jsonFile
 # .\CheckD365foConfigDependency.ps1 [Discontinuado]
@@ -48,4 +49,6 @@ if ($process.ExitCode -eq 0)
     .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
     .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
     .\ChangeIISWebSitesPath.ps1
+    .\ChangeDefaultTimeout.Pos.Framework.js.ps1
+    .\AddHealthCheckAndEnableSwaggerSetting.ps1
 }
