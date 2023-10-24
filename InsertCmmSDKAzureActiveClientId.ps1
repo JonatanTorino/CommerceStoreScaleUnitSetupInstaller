@@ -21,9 +21,11 @@ $channelConfig=$json.ChannelConfig
 #Obtento el TenantId del archivo ChannelConfig referenciado en el json de configuración
 [xml]$channelConfigXml = Get-Content $channelConfig
 $xPathTenantId = "/configuration/appSettings/add[@key='TenantId']/@value"
-$TenantId = Select-Xml -Xml $channelConfigXml -XPath $xPathTenantId 
 $xPathStoreSystemChannelDatabaseId = "/configuration/appSettings/add[@key='StoreSystemChannelDatabaseId']/@value"
+$TenantId = Select-Xml -Xml $channelConfigXml -XPath $xPathTenantId 
 $StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathStoreSystemChannelDatabaseId 
+$TelemetryAppName = $json.TelemetryAppName -replace '"', ''
+$EnvironmentId = $json.EnvironmentId -replace '"', ''
 
 #Inicializo cada variable del json
 [string]$RetailServerAadClientId=$json.RetailServerAadClientId
@@ -36,7 +38,7 @@ $rutaScriptSQL = '.\setCommerceSDK_AzureActiveDirectoryKeys.sql'
 
 try {
     # Ejecutar el script SQL
-    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey
+    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId
 }
 catch {
     Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"

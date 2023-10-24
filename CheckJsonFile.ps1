@@ -56,3 +56,18 @@ if ($null -eq $AsyncClientAppInsightsInstrumentationKey.Node.Value -Or
 {
     throw "El archivo $ChannelConfig tiene AppInsightsInstrumentationKey faltantes."
 }
+
+$xPathEnvironmentId  = "/configuration/appSettings/add[@key='EnvironmentId']/@value"
+$EnvironmentId = Select-Xml -Xml $ChannelConfigXml -XPath $xPathEnvironmentId
+$EnvironmentIdjson = $json.EnvironmentId -replace '"', ''
+$EnvironmentIdXml = $EnvironmentId.Node.Value
+if ($null -eq $EnvironmentId.Node.Value)
+{
+    throw "El archivo $ChannelConfig tiene EnvironmentId faltante."
+}
+if ($json.EnvironmentId -ne $EnvironmentId.Node.Value)
+{
+    Write-Host "JsonFile        EnvironmentId $EnvironmentIdjson"
+    Write-Host "ChannelConfig   EnvironmentId $EnvironmentIdXml"
+    throw "El archivo $ChannelConfig tiene un EnvironmentId diferente al del $jsonFile"
+}

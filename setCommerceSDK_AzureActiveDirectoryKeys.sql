@@ -11,28 +11,53 @@ declare @parmInAadRetailServerId nvarchar(38) = N'$(AadRetailServerId)'
 declare @parmInAadAsyncClientId nvarchar(38) = N'$(AadAsyncClientId)'
 declare @parmInTenantId nvarchar(255) = N'$(TenantId)'
 declare @parmInStoreSystemChannelDatabaseId nvarchar(255) = N'$(StoreSystemChannelDatabaseId)'
-declare @parmAppInsightsInstrumentationKey nvarchar(255) = N'$(AppInsightsInstrumentationKey)'
+declare @parmInAppInsightsInstrumentationKey nvarchar(255) = N'$(AppInsightsInstrumentationKey)'
+declare @parmInTelemetryAppName nvarchar(255) = N'$(TelemetryAppName)'
+declare @parmInEnvironmentId nvarchar(255) = N'$(EnvironmentId)'
+
 print 'parmInAadPOSId = '+@parmInAadPOSId 
 print 'parmInAadRetailServerId = '+@parmInAadRetailServerId
 print 'parmInAadAsyncClientId = '+@parmInAadAsyncClientId
 print 'parmInTenantId = '+@parmInTenantId
 print 'parmInStoreSystemChannelDatabaseId = '+@parmInStoreSystemChannelDatabaseId
-print 'parmAppInsightsInstrumentationKey = '+@parmAppInsightsInstrumentationKey
-
+print 'parmInAppInsightsInstrumentationKey = '+@parmInAppInsightsInstrumentationKey
+print 'parmInTelemetryAppName = ' +@parmInTelemetryAppName
+print 'parmInEnvironmentId = ' +@parmInEnvironmentId
 -----------------------------------------------------------------------------
 declare @cmmNameAsync nvarchar(100) = 'CmmSDK-AsyncClient'
 declare @cmmNamePos nvarchar(100) = 'CmmSDK-POS'
 declare @cmmNameRetailServer nvarchar(100) = 'CmmSDK-RetailServer'
 ---------------------------------------------------------------------
+DELETE FROM AxDB.dbo.SysIntParameters
+print 'AxDB.dbo.SysIntParameters, Registro borrado'
+INSERT INTO AxDB.dbo.SysIntParameters
+	(TELEMETRYAPPNAME, CAPTUREFORMRUN, CAPTUREUSERSESSIONS, CAPTUREXPPEXCEPTIONS, CAPTURECUSTOMMETRICS, CAPTUREWAREHOUSEEVENTS, CAPTURECUSTOMTRACES, CAPTURELONGQUERIES)
+	VALUES (@parmInTelemetryAppName, 1, 1, 1, 1, 1, 1, 1)
+print 'AxDB.dbo.SysIntParameters, Configuracion agregada para medir telemetria contra la aplicación ' +@parmInTelemetryAppName
+---------------------------------------------------------------------
+DELETE FROM AxDB.dbo.SysEnvironmentModeMap
+print 'AxDB.dbo.SysEnvironmentModeMap, Registro borrado'
+INSERT INTO AxDB.dbo.SysEnvironmentModeMap
+    (ENVIRONMENTMODE, SYSENVIRONMENTID)
+    VALUES (0, @parmInEnvironmentId)
+print 'AxDB.dbo.SysEnvironmentModeMap, Configuracion agregada para medir telemetria en modo DEV para el EnviromentId ' +@parmInEnvironmentId 
+---------------------------------------------------------------------
+DELETE FROM AxDB.dbo.SysIntegrationRegistry
+print 'AxDB.dbo.SysIntegrationRegistry, Registro borrado'
+INSERT INTO AxDB.dbo.SysIntegrationRegistry
+    (ENVIRONMENTMODE, SYSAPPLICATIONNAME, SYSAPPURI)
+    VALUES (0, @parmInTelemetryAppName, @parmInAppInsightsInstrumentationKey)
+print 'AxDB.dbo.SysIntegrationRegistry, Configuracion agregada para medir telemetria en modo DEV contra el AppInsightsInstrumentationKey ' +@parmInAppInsightsInstrumentationKey 
+---------------------------------------------------------------------
 UPDATE AxDB.dbo.RETAILSHAREDPARAMETERS
-SET [HARDWARESTATIONAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[CLIENTAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[CLOUDPOSAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[RETAILSERVERAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[ASYNCCLIENTAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[WINDOWSPHONEAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[ASYNCSERVERCONNECTORSERVICEAPPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey,
-	[REALTIMESERVICEAX63APPINSIGHTSINSTRUMENTATIONKEY] = @parmAppInsightsInstrumentationKey
+SET [HARDWARESTATIONAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[CLIENTAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[CLOUDPOSAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[RETAILSERVERAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[ASYNCCLIENTAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[WINDOWSPHONEAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[ASYNCSERVERCONNECTORSERVICEAPPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey,
+	[REALTIMESERVICEAX63APPINSIGHTSINSTRUMENTATIONKEY] = @parmInAppInsightsInstrumentationKey
 print 'AxDB.dbo.RETAILSHAREDPARAMETERS AppInsightsInstrumentationKey actualizados'
 ---------------------------------------------------------------------
 IF (SELECT COUNT(1) FROM AxDB.dbo.RetailConnDatabaseProfile 
