@@ -12,7 +12,6 @@ Write-Host
 
 # Parámetros de conexión a la base de datos
 $server = $env:COMPUTERNAME
-$database = "AxDB"
 
 #Parseo el archivo json para leer sus propiedades
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
@@ -23,22 +22,19 @@ $channelConfig=$json.ChannelConfig
 $xPathTenantId = "/configuration/appSettings/add[@key='TenantId']/@value"
 $xPathStoreSystemChannelDatabaseId = "/configuration/appSettings/add[@key='StoreSystemChannelDatabaseId']/@value"
 $TenantId = Select-Xml -Xml $channelConfigXml -XPath $xPathTenantId 
-$StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathStoreSystemChannelDatabaseId 
-$TelemetryAppName = $json.TelemetryAppName -replace '"', ''
-$EnvironmentId = $json.EnvironmentId -replace '"', ''
+$StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathStoreSystemChannelDatabaseId
 
 #Inicializo cada variable del json
 [string]$RetailServerAadClientId=$json.RetailServerAadClientId
 [string]$CposAadClientId=$json.CposAadClientId
 [string]$AsyncClientAadClientId=$json.AsyncClientAadClientId
-[string]$AppInsightsInstrumentationKey=$json.AppInsightsInstrumentationKey
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\setCommerceSDK_AzureActiveDirectoryKeys.sql'
+$rutaScriptSQL = '.\InsertCmmSDKAzureActiveClientId.sql'
 
 try {
     # Ejecutar el script SQL
-    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId
+    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId
 }
 catch {
     Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"

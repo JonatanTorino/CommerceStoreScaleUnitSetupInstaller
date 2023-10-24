@@ -11,6 +11,7 @@ choco install powershell-core -y
 .\CheckJsonFile.ps1 $jsonFile
 # .\CheckD365foConfigDependency.ps1 [Discontinuado]
 .\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
+.\SetApplicationInsightConfig.ps1 $jsonFile
 .\CheckRegeditEntriesDependency.ps1
 # .\CheckNetCoreBundleDependency.ps1 [Discontinuado]
 
