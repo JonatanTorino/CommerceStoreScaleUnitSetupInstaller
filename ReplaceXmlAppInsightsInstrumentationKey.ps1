@@ -30,7 +30,7 @@ foreach ($nodo in $nodos) {
     $nodo.SetAttribute("value", $AppInsightsInstrumentationKey)  # Reemplaza "NuevoValor" con el valor deseado
 }
 
-$nodos = $xml.SelectNodes('//add[contains(@key, "EnvironmentId")]')
+$nodo = $xml.SelectSingleNode('//add[contains(@key, "EnvironmentId")]')
 $nodo.SetAttribute("value", $EnvironmentId)  # Reemplaza "NuevoValor" con el valor deseado
 
 # Guardar los cambios en el archivo
