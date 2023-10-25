@@ -8,7 +8,7 @@ param (
 )
 choco install powershell-core -y
 
-# [WIP] .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
+.\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 .\CheckJsonFile.ps1 $jsonFile
 # [WIP] .\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
 # [Discontinuado] .\CheckD365foConfigDependency.ps1 
