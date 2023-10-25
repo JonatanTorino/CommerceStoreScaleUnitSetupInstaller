@@ -21,6 +21,7 @@ git fetch origin $nombreRama
 # Compara la rama local con la rama remota
 if ((git rev-list HEAD...origin/$nombreRama --count) -eq 0) {
     Write-Host "El repositorio está actualizado al día."
+    Write-Host -ForegroundColor Green "para actualizar ejecute un git pull"
 } else {
     throw [System.IO.FileNotFoundException] "El repositorio no está actualizado. Hay cambios en la rama remota."
 }
