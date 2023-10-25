@@ -8,6 +8,8 @@ param (
 )
 choco install powershell-core -y
 
+Stop-WebAppPool -Name 'RetailServer'
+
 .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 .\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
 .\CheckJsonFile.ps1 $jsonFile
@@ -55,3 +57,5 @@ if ($process.ExitCode -eq 0)
     .\ChangeDefaultTimeout.Pos.Framework.js.ps1
     .\AddHealthCheckAndEnableSwaggerSetting.ps1
 }
+
+Start-WebAppPool -Name 'RetailServer'
