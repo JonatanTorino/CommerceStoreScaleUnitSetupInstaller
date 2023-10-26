@@ -18,6 +18,7 @@ print 'parmInAadAsyncClientId = '+@parmInAadAsyncClientId
 print 'parmInTenantId = '+@parmInTenantId
 print 'parmInStoreSystemChannelDatabaseId = '+@parmInStoreSystemChannelDatabaseId
 -----------------------------------------------------------------------------
+declare @cmmNameCSU nvarchar(100) = 'CmmSDK-CSU'
 declare @cmmNameAsync nvarchar(100) = 'CmmSDK-AsyncClient'
 declare @cmmNamePos nvarchar(100) = 'CmmSDK-POS'
 declare @cmmNameRetailServer nvarchar(100) = 'CmmSDK-RetailServer'
@@ -48,13 +49,13 @@ set @TenantId = @parmInTenantId
 ----------------------------------------------------------------
 declare @UserId nvarchar(20) = 'RetailServiceAccount'
 
-IF (@parmInAadAsyncClientId = @parmInAadPOSId AND @parmInAadAsyncClientId = @parmInAadRetailServerId)
+IF (@parmInAadPOSId = @parmInAadRetailServerId AND @parmInAadPOSId = @parmInAadAsyncClientId)
 BEGIN
     MERGE AxDB.dbo.SysAADClientTable AS destino
     USING (
         SELECT ClientId, [Name], UserId FROM (
             VALUES 
-                (@parmInAadPOSId, @cmmNamePos, @UserId)
+                (@parmInAadPOSId, @cmmNameCSU, @UserId)
         ) AS subquery (ClientId, [Name], UserId)
     ) AS origen
     ON (destino.AADCLIENTID = origen.ClientId) -- Condición de combinación
