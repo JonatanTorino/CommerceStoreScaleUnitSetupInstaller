@@ -48,26 +48,48 @@ set @TenantId = @parmInTenantId
 ----------------------------------------------------------------
 declare @UserId nvarchar(20) = 'RetailServiceAccount'
 
-MERGE AxDB.dbo.SysAADClientTable AS destino
-USING (
-    SELECT ClientId, [Name], UserId FROM (
-        VALUES 
-            (@parmInAadAsyncClientId, @cmmNameAsync, @UserId),
-            (@parmInAadPOSId, @cmmNamePos, @UserId),
-            (@parmInAadRetailServerId, @cmmNameRetailServer, @UserId)
-    ) AS subquery (ClientId, [Name], UserId)
-) AS origen
-ON (destino.AADCLIENTID = origen.ClientId) -- Condición de combinación
+IF (@parmInAadAsyncClientId = @parmInAadPOSId AND @parmInAadAsyncClientId = @parmInAadRetailServerId)
+BEGIN
+    MERGE AxDB.dbo.SysAADClientTable AS destino
+    USING (
+        SELECT ClientId, [Name], UserId FROM (
+            VALUES 
+                (@parmInAadPOSId, @cmmNamePos, @UserId)
+        ) AS subquery (ClientId, [Name], UserId)
+    ) AS origen
+    ON (destino.AADCLIENTID = origen.ClientId) -- Condición de combinación
 
--- Si hay una coincidencia, actualiza los valores
-WHEN MATCHED THEN
-    UPDATE SET destino.USERID = origen.UserId, destino.[NAME] = origen.[Name]
+    -- Si hay una coincidencia, actualiza los valores
+    WHEN MATCHED THEN
+        UPDATE SET destino.USERID = origen.UserId, destino.[NAME] = origen.[Name]
 
--- Si no hay una coincidencia, inserta los valores
-WHEN NOT MATCHED THEN
-    INSERT (AADCLIENTID, [NAME], USERID)
-    VALUES (origen.ClientId, origen.[Name], origen.UserId);
+    -- Si no hay una coincidencia, inserta los valores
+    WHEN NOT MATCHED THEN
+        INSERT (AADCLIENTID, [NAME], USERID)
+        VALUES (origen.ClientId, origen.[Name], origen.UserId);
+END
+ELSE
+BEGIN
+    MERGE AxDB.dbo.SysAADClientTable AS destino
+    USING (
+        SELECT ClientId, [Name], UserId FROM (
+            VALUES 
+                (@parmInAadAsyncClientId, @cmmNameAsync, @UserId),
+                (@parmInAadPOSId, @cmmNamePos, @UserId),
+                (@parmInAadRetailServerId, @cmmNameRetailServer, @UserId)
+        ) AS subquery (ClientId, [Name], UserId)
+    ) AS origen
+    ON (destino.AADCLIENTID = origen.ClientId) -- Condición de combinación
 
+    -- Si hay una coincidencia, actualiza los valores
+    WHEN MATCHED THEN
+        UPDATE SET destino.USERID = origen.UserId, destino.[NAME] = origen.[Name]
+
+    -- Si no hay una coincidencia, inserta los valores
+    WHEN NOT MATCHED THEN
+        INSERT (AADCLIENTID, [NAME], USERID)
+        VALUES (origen.ClientId, origen.[Name], origen.UserId);
+END
 print 'AxDB.dbo.SysAADClientTable, Azure Application Id agregados'
 -----------------------------------------------------------------------------
 declare @Issuer nvarchar(255) = Concat('https://sts.windows.net/', @TenantId, '/')
