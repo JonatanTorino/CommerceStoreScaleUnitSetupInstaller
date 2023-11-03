@@ -1,17 +1,15 @@
-#Requires -RunAsAdministrator
+# #Requires -RunAsAdministrator
 
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory = $true)]
-    [string][ValidateNotNullOrEmpty()]$jsonFile
+    [string]$jsonFile
     ,
     [switch]$skipHostingBudle = $false
 )
-choco install powershell-core -y
-
-Stop-WebAppPool -Name 'RetailServer'
 
 .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
+$jsonFile = Invoke-Expression -Command ".\GetJsonConfigFile.ps1" -jsonFile $jsonFile
+
 .\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
 .\CheckJsonFile.ps1 $jsonFile
 # [Discontinuado] .\CheckD365foConfigDependency.ps1 
@@ -38,26 +36,38 @@ Write-Host
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
 $ScaleUnitSetupPath = $json.ScaleUnitSetupPath
-$HttpPort = $json.HttpPort
-$CertStore = "store:///My/LocalMachine?FindByThumbprint="
-$Thumbprint = $json.Thumbprint
-$SslCertFullPath = $CertStore + $Thumbprint
-$RetailServerAadClientId = $json.RetailServerAadClientId
-$RetailServerAadResourceId = $json.RetailServerAadResourceId
-$CposAadClientId = $json.CposAadClientId
-$AsyncClientAadClientId = $json.AsyncClientAadClientId
-$config = $json.ChannelConfig
-$IntervalAsyncClient = $json.IntervalAsyncClient
+if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
+    $HttpPort = $json.HttpPort
+    $CertStore = "store:///My/LocalMachine?FindByThumbprint="
+    $Thumbprint = $json.Thumbprint
+    $SslCertFullPath = $CertStore + $Thumbprint
+    $RetailServerAadClientId = $json.RetailServerAadClientId
+    $RetailServerAadResourceId = $json.RetailServerAadResourceId
+    $CposAadClientId = $json.CposAadClientId
+    $AsyncClientAadClientId = $json.AsyncClientAadClientId
+    $config = $json.ChannelConfig
+    $IntervalAsyncClient = $json.IntervalAsyncClient
 
-#Los parametros -Wait -PassThru son para el flujo del script
-$process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"
-$process.WaitForExit()
-if ($process.ExitCode -eq 0) {
-    .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
-    .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
-    .\ChangeIISWebSitesPath.ps1
-    .\ChangeDefaultTimeout.Pos.Framework.js.ps1
-    .\AddHealthCheckAndEnableSwaggerSetting.ps1
+    try {
+        Stop-WebAppPool -Name 'RetailServer'
+    } catch { }
+
+    #Los parametros -Wait -PassThru son para el flujo del script
+    $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"
+    $process.WaitForExit()
+    if ($process.ExitCode -eq 0) {
+        .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
+        .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
+        .\ChangeIISWebSitesPath.ps1
+        .\ChangeDefaultTimeout.Pos.Framework.js.ps1
+        .\AddHealthCheckAndEnableSwaggerSetting.ps1
+    }
+
+    try {
+        Start-WebAppPool -Name 'RetailServer'
+    } catch { }
+} 
+else {
+    Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
+    Write-Host -ForegroundColor Red "   $ScaleUnitSetupPath"
 }
-
-Start-WebAppPool -Name 'RetailServer'
