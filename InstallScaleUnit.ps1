@@ -6,9 +6,14 @@ param (
     ,
     [switch]$skipHostingBudle = $false
 )
-
 .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
-$jsonFile = Invoke-Expression -Command ".\GetJsonConfigFile.ps1" -jsonFile $jsonFile
+
+$GetJsonConfigFile = ".\GetJsonConfigFile.ps1"
+$jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
+
+if ([string]::IsNullOrEmpty($jsonFile)) {
+    throw [System.ArgumentNullException] "jsonFile" 
+}
 
 .\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
 .\CheckJsonFile.ps1 $jsonFile
