@@ -15,7 +15,7 @@ if ([string]::IsNullOrEmpty($jsonFile) -or -not (Test-Path -Path $jsonFile -Path
     # if ((Test-Path $jsonFile -PathType Leaf) -eq $false) {
     if (($null -ne $jsonFileDefault) -and
         (Test-Path $jsonFileDefault -PathType Any)) {
-        Write-Host "ARCHIVO ENCONTRADO"
+        Write-Host -ForegroundColor Green "ARCHIVO ENCONTRADO"
     }
     else {
         Write-Host -ForegroundColor Red "Archivo no encontrado: $rutaArchivoEntorno"

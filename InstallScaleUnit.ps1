@@ -5,8 +5,13 @@ param (
     [string]$jsonFile
     ,
     [switch]$skipHostingBudle = $false
+    ,
+    [switch]$skipCheckGitRepoUpdated = $false
 )
-.\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
+
+if (!$skipCheckGitRepoUpdated) {
+    .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
+}
 
 $GetJsonConfigFile = ".\GetJsonConfigFile.ps1"
 $jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
@@ -21,7 +26,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 .\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
 .\SetApplicationInsightConfig.ps1 $jsonFile
 .\CheckRegeditEntriesDependency.ps1
-# .\CheckNetCoreBundleDependency.ps1 [Discontinuado]
+# [Discontinuado] .\CheckNetCoreBundleDependency.ps1
 
 if ($skipHostingBudle -eq $false) {
     #Programa y versión concreta a buscar
@@ -42,6 +47,9 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
 $ScaleUnitSetupPath = $json.ScaleUnitSetupPath
 if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
+    # Quitar la marca "unblock" del archivo descargado
+    Unblock-File -Path $ScaleUnitSetupPath
+
     $HttpPort = $json.HttpPort
     $CertStore = "store:///My/LocalMachine?FindByThumbprint="
     $Thumbprint = $json.Thumbprint
