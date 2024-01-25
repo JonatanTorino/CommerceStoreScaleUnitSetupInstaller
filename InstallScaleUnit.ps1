@@ -32,10 +32,10 @@ if ($skipHostingBudle -eq $false) {
     #Programa y versión concreta a buscar
     # $HostingBudle = "Microsoft ASP.NET Core 6.0.6 Hosting Bundle Options"
     # $url = "https://download.visualstudio.microsoft.com/download/pr/0d000d1b-89a4-4593-9708-eb5177777c64/cfb3d74447ac78defb1b66fd9b3f38e0/dotnet-hosting-6.0.6-win.exe"
-    # $HostingBudle = "Microsoft ASP.NET Core 6.0.21 Hosting Bundle Options"
-    # $url = "https://download.visualstudio.microsoft.com/download/pr/b50f2f63-23ed-4c96-9b38-71d319107d1b/26f8c79415eccaef1f2e0614e10cd701/dotnet-hosting-6.0.21-win.exe"
-    $HostingBudle = "Microsoft ASP.NET Core 6.0.26 Hosting Bundle Options"
-    $url = "https://download.visualstudio.microsoft.com/download/pr/16e13e4d-a240-4102-a460-3f4448afe1c3/3d832f15255d62bee8bc86fed40084ef/dotnet-hosting-6.0.26-win.exe"
+    $HostingBudle = "Microsoft ASP.NET Core 6.0.21 Hosting Bundle Options"
+    $url = "https://download.visualstudio.microsoft.com/download/pr/b50f2f63-23ed-4c96-9b38-71d319107d1b/26f8c79415eccaef1f2e0614e10cd701/dotnet-hosting-6.0.21-win.exe"
+    # $HostingBudle = "Microsoft ASP.NET Core 6.0.26 Hosting Bundle Options"
+    # $url = "https://download.visualstudio.microsoft.com/download/pr/16e13e4d-a240-4102-a460-3f4448afe1c3/3d832f15255d62bee8bc86fed40084ef/dotnet-hosting-6.0.26-win.exe"
     .\CheckAndDownload.ps1 $HostingBudle $url 
 }
 
