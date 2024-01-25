@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param (
     [string]
-    [ValidateNotNullOrEmpty()]$jsonFile
+    # [ValidateNotNullOrEmpty()]
+    $jsonFile
 )
 
 Write-Host 
@@ -9,6 +10,9 @@ Write-Host "========================================"
 Write-Host "     Inserting in AxDB the AadClientIds     "
 Write-Host "========================================"
 Write-Host 
+
+$GetJsonConfigFile = ".\GetJsonConfigFile.ps1"
+$jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
 
 # Parámetros de conexión a la base de datos
 $server = $env:COMPUTERNAME
@@ -28,13 +32,15 @@ $StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathS
 [string]$RetailServerAadClientId=$json.RetailServerAadClientId
 [string]$CposAadClientId=$json.CposAadClientId
 [string]$AsyncClientAadClientId=$json.AsyncClientAadClientId
+[string]$RetailServerURL='"'+$json.RetailServerURL+'"'
+[string]$CPOSURL='"'+$json.CPOSUrl+'"'
 
 # Ruta del archivo SQL
 $rutaScriptSQL = '.\InsertCmmSDKAzureActiveClientId.sql'
 
 try {
     # Ejecutar el script SQL
-    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId
+    SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
 }
 catch {
     Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"

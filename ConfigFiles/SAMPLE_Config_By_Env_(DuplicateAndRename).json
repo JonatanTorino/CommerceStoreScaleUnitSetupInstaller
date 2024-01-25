@@ -1,6 +1,7 @@
 {
     "EnvironmentId": "",
     "RetailServerURL": "",
+    "CPOSUrl": "",
     "Thumbprint": "",
     "__Comment1_": "La siguiente data puede ser común a todos los entornos DEVs, la data previa puede ser diferente en cada entorno",
     "ScaleUnitSetupPath": "K:\\Axxon\\GitHub.JonatanTorino\\CommerceStoreScaleUnitSetupInstaller\\CSU.9.47\\CommerceStoreScaleUnitSetup.exe",

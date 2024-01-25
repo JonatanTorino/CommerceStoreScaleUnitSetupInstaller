@@ -20,6 +20,8 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
 }
 
+.\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
+
 Write-Host 
 Write-Host "========================================"
 Write-Host "     Update Certificate for CSU          "
@@ -31,11 +33,14 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 $ScaleUnitSetupPath = $json.ScaleUnitSetupPath
 if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
     
+    $CertStore = "store:///My/LocalMachine?FindByThumbprint="
+    $Thumbprint = $json.Thumbprint
+    $SslCertFullPath = $CertStore + $Thumbprint
+
     try {
         Stop-WebAppPool -Name 'RetailServer'
     } catch { }
 
-    #Los parametros -Wait -PassThru son para el flujo del script
     #Los parametros -Wait -PassThru son para el flujo del script
     $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "updateCertificates --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath  --RetailServerCertFullPath $SslCertFullPath"
 

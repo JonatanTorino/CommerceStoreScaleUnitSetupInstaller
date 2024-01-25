@@ -11,23 +11,44 @@ declare @parmInAadRetailServerId nvarchar(38) = N'$(AadRetailServerId)'
 declare @parmInAadAsyncClientId nvarchar(38) = N'$(AadAsyncClientId)'
 declare @parmInTenantId nvarchar(255) = N'$(TenantId)'
 declare @parmInStoreSystemChannelDatabaseId nvarchar(255) = N'$(StoreSystemChannelDatabaseId)'
+declare @parmInRetailServerURL nvarchar(255) = N'$(RetailServerURL)'
+declare @parmInCPOSURL nvarchar(255) = N'$(CPOSURL)'
 
 print 'parmInAadPOSId = '+@parmInAadPOSId 
 print 'parmInAadRetailServerId = '+@parmInAadRetailServerId
 print 'parmInAadAsyncClientId = '+@parmInAadAsyncClientId
 print 'parmInTenantId = '+@parmInTenantId
 print 'parmInStoreSystemChannelDatabaseId = '+@parmInStoreSystemChannelDatabaseId
+print 'parmInRetailServerURL = '+@parmInRetailServerURL
+print 'parmInCPOSURL = '+@parmInCPOSURL
 -----------------------------------------------------------------------------
 declare @cmmNameCSU nvarchar(100) = 'CmmSDK-CSU'
 declare @cmmNameAsync nvarchar(100) = 'CmmSDK-AsyncClient'
 declare @cmmNamePos nvarchar(100) = 'CmmSDK-POS'
 declare @cmmNameRetailServer nvarchar(100) = 'CmmSDK-RetailServer'
 ---------------------------------------------------------------------
+IF (SELECT COUNT(1) FROM AxDB.dbo.RetailChannelProfile
+    WHERE [Name] = 'DEFAULT') = 0
+BEGIN
+    INSERT INTO AxDB.dbo.RetailChannelProfile
+        ([ChannelProfileType], [Name])
+    VALUES 
+        (6, 'Default')
+END
+declare @RetailChannelProfile_RecId bigint
+select @RetailChannelProfile_RecId = RecId from AxDB.dbo.RetailChannelProfile where [Name] = 'Default'
+DELETE FROM AxDB.dbo.RetailChannelProfileProperty WHERE ChannelProfile = @RetailChannelProfile_RecId
+INSERT INTO AxDB.dbo.RetailChannelProfileProperty
+    ([ChannelProfile], [Key_], [Value])
+VALUES 
+    (@RetailChannelProfile_RecId, 1, @parmInRetailServerURL),
+    (@RetailChannelProfile_RecId, 7, @parmInCPOSURL)
+---------------------------------------------------------------------
 IF (SELECT COUNT(1) FROM AxDB.dbo.RetailConnDatabaseProfile 
     WHERE [Name] = @parmInStoreSystemChannelDatabaseId) = 0
 BEGIN
     declare @RetailCDXDataGroup_RecId bigint
-    select @RetailCDXDataGroup_RecId = RecID from AxDB.dbo.RetailCDXDataGroup where [Name] = 'Default'
+    select @RetailCDXDataGroup_RecId = RecId from AxDB.dbo.RetailCDXDataGroup where [Name] = 'Default'
     INSERT INTO AxDB.dbo.RetailConnDatabaseProfile
             ([Name], [DataGroup])
     VALUES (@parmInStoreSystemChannelDatabaseId, @RetailCDXDataGroup_RecId)
