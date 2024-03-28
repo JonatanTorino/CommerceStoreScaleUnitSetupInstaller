@@ -1,5 +1,11 @@
 #Requires -RunAsAdministrator
 
+Write-Host 
+Write-Host "=========================================================="
+Write-Host "            ChangeDefaultTimeout.Pos.Framework.js         "
+Write-Host "=========================================================="
+Write-Host 
+
 # Ruta del archivo que deseas modificar
 $rutaDelArchivo = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Microsoft\POS\Pos.Framework.js"
 

@@ -1,5 +1,11 @@
 #Requires -RunAsAdministrator
 
+Write-Host 
+Write-Host "========================================"
+Write-Host "            ChangeIISWebSitesPath         "
+Write-Host "========================================"
+Write-Host 
+
 $ScaleUnitPath = 'C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Microsoft\'
 $ScaleUnitPathPOS = $ScaleUnitPath+'POS'
 $ScaleUnitPathRetailServer = $ScaleUnitPath+'RetailServer'

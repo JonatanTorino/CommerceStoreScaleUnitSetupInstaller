@@ -1,5 +1,11 @@
 #Requires -RunAsAdministrator
 
+Write-Host 
+Write-Host "========================================================"
+Write-Host "            AddHealthCheckAndEnableSwaggerSetting       "
+Write-Host "========================================================"
+Write-Host 
+
 # Ruta del archivo que deseas modificar
 $rutaDelArchivo = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Microsoft\RetailServer\bin\Microsoft.Dynamics.Retail.RetailServer.AspNetCore.dll.config"
 
@@ -12,19 +18,20 @@ $guardarXml = $false
 $nodeNotFoundHealthCheck = $true
 $nodeNotFoundEnableSwagger = $true
 foreach ($nodoExistente in $nodoPadre.ChildNodes) {
+    if ($nodoExistente.NodeType -ne "Comment") {
+        #HealthCheck.Extensions.ShowAssemblyFiles
+        if ($nodoExistente.GetAttribute("key") -eq "HealthCheck.Extensions.ShowAssemblyFiles") {
+            $nodeNotFoundHealthCheck = $false
+        }
 
-    #HealthCheck.Extensions.ShowAssemblyFiles
-    if ($nodoExistente.GetAttribute("key") -eq "HealthCheck.Extensions.ShowAssemblyFiles") {
-        $nodeNotFoundHealthCheck = $false
-    }
+        #EnableSwagger
+        if ($nodoExistente.Name -eq "add" -and $nodoExistente.GetAttribute("key") -eq "EnableSwagger") {
+            $nodeNotFoundEnableSwagger = $false
+        }
 
-    #EnableSwagger
-    if ($nodoExistente.Name -eq "add" -and $nodoExistente.GetAttribute("key") -eq "EnableSwagger") {
-        $nodeNotFoundEnableSwagger = $false
-    }
-
-    if ($nodeNotFoundHealthCheck -eq $false -and $nodeNotFoundEnableSwagger -eq $false) {
-        break
+        if ($nodeNotFoundHealthCheck -eq $false -and $nodeNotFoundEnableSwagger -eq $false) {
+            break
+        }
     }
 }
 
@@ -39,7 +46,7 @@ if ($nodeNotFoundHealthCheck) {
     $guardarXml = $true
 }
 
-if ($nodeNotFoundEnableSwagger){
+if ($nodeNotFoundEnableSwagger) {
     Write-Host "No se encontró ningún nodo <add> con el key 'EnableSwagger'"
     # Aquí puedes realizar cualquier acción que necesites cuando no encuentres el nodo
     $nuevoNodo = $xml.CreateElement("add")
