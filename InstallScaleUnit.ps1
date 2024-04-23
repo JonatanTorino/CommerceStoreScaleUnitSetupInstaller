@@ -7,6 +7,8 @@ param (
     [switch]$skipHostingBudle = $false
     ,
     [switch]$skipCheckGitRepoUpdated = $false
+    ,
+    [switch]$skipTelemetryCheck = $false
 )
 
 if (!$skipCheckGitRepoUpdated) {
@@ -65,22 +67,30 @@ if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
 
     try {
         Stop-WebAppPool -Name 'RetailServer'
-    } catch { }
+    }
+    catch { }
 
-    #Los parametros -Wait -PassThru son para el flujo del script
-    $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"
+    if ($skipTelemetryCheck) {
+        $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck --skipTelemetryCheck" 
+    }
+    else {
+        #Los parametros -Wait -PassThru son para el flujo del script
+        $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"    
+    }
+
     $process.WaitForExit()
     if ($process.ExitCode -eq 0) {
         .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
         .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
-        .\ChangeIISWebSitesPath.ps1
+        # .\ChangeIISins    WebSitesPath.ps1
         .\ChangeDefaultTimeout.Pos.Framework.js.ps1
         .\AddHealthCheckAndEnableSwaggerSetting.ps1
     }
 
     try {
         Start-WebAppPool -Name 'RetailServer'
-    } catch { }
+    }
+    catch { }
 } 
 else {
     Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
