@@ -8,9 +8,10 @@ param ( #Recibir valor en este formato 00:01:00
     [ValidateNotNullOrEmpty()]$newInterval
 ) 
 
+$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
 Write-Host "========================================"
-Write-Host "            ChangeAsyncInterval         "
+Write-Host "    $currentFileName"
 Write-Host "========================================"
 Write-Host 
 

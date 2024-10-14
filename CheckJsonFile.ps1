@@ -4,11 +4,12 @@ param (
     [ValidateNotNullOrEmpty()]$jsonFile
 )
 
+$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
-Write-Host "==============================="
-Write-Host "        Check Json File        "
-Write-Host "==============================="
-Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
 
 if (-not (Test-Path $jsonFile)) {
     throw [System.IO.FileNotFoundException] "$jsonFile not found."

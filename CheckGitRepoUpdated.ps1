@@ -2,6 +2,13 @@ param (
     [string]$rutaRepositorio
 )
 
+$currentFileName = (Get-Item $PSCommandPath).Name
+Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
+
 # Nombre de la rama que deseas verificar (por ejemplo, "main" o "master")
 $nombreRama = "main"
 

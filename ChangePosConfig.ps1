@@ -8,6 +8,13 @@ param ( #Recibir valor en este formato 00:01:00
 [ValidateNotNullOrEmpty()]$urlRetailServerCommerce
 ) 
 
+$currentFileName = (Get-Item $PSCommandPath).Name
+Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host 
+
 $originalPath = Get-Location
 
 $path = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Microsoft\POS\"

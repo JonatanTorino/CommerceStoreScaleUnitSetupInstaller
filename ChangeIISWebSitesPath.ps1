@@ -1,8 +1,9 @@
 #Requires -RunAsAdministrator
 
+$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
 Write-Host "========================================"
-Write-Host "            ChangeIISWebSitesPath         "
+Write-Host "    $currentFileName"
 Write-Host "========================================"
 Write-Host 
 

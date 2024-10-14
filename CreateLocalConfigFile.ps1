@@ -32,6 +32,13 @@ function GetWebSiteUrl {
     return $url
 }
 
+$currentFileName = (Get-Item $PSCommandPath).Name
+Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
+
 # Crear archivo
 $hostname = $env:COMPUTERNAME
 $jsonFile = ".\ConfigFiles\$hostname.json"

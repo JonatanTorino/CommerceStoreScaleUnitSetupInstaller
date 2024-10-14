@@ -2,6 +2,13 @@ param (
     [string]$jsonFile
 )
 
+$currentFileName = (Get-Item $PSCommandPath).Name
+Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
+
 # Comprobar si el parámetro no fue pasado
 if ([string]::IsNullOrEmpty($jsonFile) -or -not (Test-Path -Path $jsonFile -PathType Leaf)) {
     $nombreEntorno = [System.Environment]::MachineName

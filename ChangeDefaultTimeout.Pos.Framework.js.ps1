@@ -1,9 +1,10 @@
 #Requires -RunAsAdministrator
 
+$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
-Write-Host "=========================================================="
-Write-Host "            ChangeDefaultTimeout.Pos.Framework.js         "
-Write-Host "=========================================================="
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
 Write-Host 
 
 # Ruta del archivo que deseas modificar

@@ -1,8 +1,9 @@
-﻿Write-Host 
-Write-Host "========================================"
-Write-Host "       CheckRegeditEntriesDependency    "
-Write-Host "========================================"
+﻿$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
 
 #Write Key Value
 function WriteRegEditKeyValue {

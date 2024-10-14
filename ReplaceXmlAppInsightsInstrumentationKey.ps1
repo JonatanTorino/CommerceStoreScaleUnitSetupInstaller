@@ -4,11 +4,12 @@ param (
     [ValidateNotNullOrEmpty()]$jsonFile
 )
 
+$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
-Write-Host "==============================="
-Write-Host "        Replace Xml Config AppInsightsInstrumentationKey        "
-Write-Host "==============================="
-Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
 
 #Parseo el archivo json para leer sus propiedades
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json

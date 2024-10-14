@@ -14,9 +14,10 @@ param (
     [ValidateNotNullOrEmpty()]$downloadURL
 ) 
 
+$currentFileName = (Get-Item $PSCommandPath).Name
 Write-Host 
 Write-Host "========================================"
-Write-Host "       Check and download: $searchTerm  "
+Write-Host "    $currentFileName : $searchTerm "
 Write-Host "========================================"
 Write-Host 
 
@@ -24,18 +25,15 @@ Write-Host "Este proceso de busqueda puede tardar varios minutos, " -ForegroundC
 Write-Host "si ya posee instalado '$searchTerm' puede saltear este proceso" -ForegroundColor Green
 $continuar = $false
 $preguntar = $true
-while ($preguntar) 
-{
+while ($preguntar) {
     $respuesta = Read-Host -Prompt "¿Desea continuar con la búsqueda? [Y|N]"
-    if ($respuesta -eq "Y" -or $respuesta -eq "N")
-    {
+    if ($respuesta -eq "Y" -or $respuesta -eq "N") {
         $preguntar = $false
         $continuar = $respuesta -eq "Y"
     }
 }
 
-if ($continuar)
-{
+if ($continuar) {
     #Reemplazar el string por el patron del programa que se desee buscar
     Write-Host 
     Write-Host -ForegroundColor yellow "Buscando si esta instalado '$searchTerm'"
@@ -54,24 +52,25 @@ if ($continuar)
         Invoke-WebRequest -Uri $downloadURL -OutFile $downloadPath
 
         $fileNameExt = Get-ChildItem $downloadPath | Select-Object Extension 
-
         switch ($fileNameExt.Extension) {
             ".msi" { 
                 Write-Host -ForegroundColor yellow "`nInstallando '$searchTerm' en modo silencioso"
-                Start-Process msiexec.exe -Wait -ArgumentList "/I $downloadPath /quiet"
+                Start-Process -Wait -FilePath "$env:temp\$downloadFileName" -ArgumentList "/quiet /norestart"
             }
             ".exe" { 
+                Write-Host -ForegroundColor yellow "`nInstallando '$searchTerm' en modo silencioso"
+                Start-Process -Wait -FilePath "$env:temp\$downloadFileName" -ArgumentList "/quiet /norestart"
+            }
+            Default {
                 Write-Host -ForegroundColor yellow "`nSe ejecutará '$searchTerm', por favor siga los pasos de la ventana del instalador..."
                 Start-Process "$env:temp\$downloadFileName" -Wait
             }
-            Default {
-                Start-Process "$env:temp\$downloadFileName" -Wait
-            }
         }
-        Write-Host -ForegroundColor yellow "'$searchTerm' instalado"
+
+        Write-Host -ForegroundColor Green "'$searchTerm' instalado"
     }
     else {
-        Write-Host -ForegroundColor Yellow "`n "$searchTerm" is already installed !!"
+        Write-Host -ForegroundColor Blue "`n "$searchTerm" is already installed !!"
         Write-Host 
     }
 }

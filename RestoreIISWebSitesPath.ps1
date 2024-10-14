@@ -1,5 +1,12 @@
 #Requires -RunAsAdministrator
 
+$currentFileName = (Get-Item $PSCommandPath).Name
+Write-Host 
+Write-Host "========================================"
+Write-Host "    $currentFileName"
+Write-Host "========================================"
+Write-Host
+
 $ScaleUnitPathPOS = 'K:\RetailCloudPos\WebRoot'
 $ScaleUnitPathRetailServer = 'K:\RetailServer\WebRoot'
 
