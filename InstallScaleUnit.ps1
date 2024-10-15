@@ -66,11 +66,6 @@ if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
     $config = $json.ChannelConfig
     $IntervalAsyncClient = $json.IntervalAsyncClient
 
-    try {
-        Stop-WebAppPool -Name 'RetailServer'
-    }
-    catch { }
-
     if ($skipTelemetryCheck) {
         $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck --skipTelemetryCheck" 
     }
@@ -88,10 +83,6 @@ if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
         .\AddHealthCheckAndEnableSwaggerSetting.ps1
     }
 
-    try {
-        Start-WebAppPool -Name 'RetailServer'
-    }
-    catch { }
 } 
 else {
     Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
