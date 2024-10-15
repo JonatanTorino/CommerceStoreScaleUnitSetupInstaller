@@ -83,7 +83,7 @@ if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
     if ($process.ExitCode -eq 0) {
         .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
         .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
-        .\SetupIISWebSiteCSU.ps1.ps1 $json.RetailServerURL
+        .\SetupIISWebSiteCSU.ps1 $json.RetailServerURL
         .\ChangeDefaultTimeout.Pos.Framework.js.ps1
         .\AddHealthCheckAndEnableSwaggerSetting.ps1
     }
