@@ -23,6 +23,28 @@ $siteName = "RetailStoreScaleUnitWebSite.AspNetCore"  # Cambia este valor por el
 $newHostname = $uri.Host
 $newPort = 443  # Puerto HTTPS
 
+#Cambio el puerto de WebSite RetailServer para reutilizar el 443
+# Obtiene el binding con el puerto especificado
+$RetailServer = "RetailServer"
+$binding = Get-WebBinding -Name $RetailServer | Where-Object { $_.bindingInformation -like "*:${newPort}:*" }
+if ($binding) {
+    $dummyPort = 444
+    # Obtiene la información del binding actual
+    $bindingInfo = $binding.BindingInformation
+    $protocol = $binding.Protocol
+
+    # Elimina el binding con el puerto actual
+    Remove-WebBinding -Name $RetailServer -BindingInformation $bindingInfo -Protocol $protocol
+
+    # Crea un nuevo binding con el puerto actualizado
+    # New-WebBinding -Name $RetailServer -BindingInformation $newBindingInfo -Protocol $protocol
+    $binding = New-WebBinding -Name $RetailServer -IPAddress "*" -Port $dummyPort -HostHeader $newHostname -Protocol https
+
+    Write-Host "El puerto del binding ha sido cambiado de $dummyPort a $newPort para el sitio $RetailServer."
+} else {
+    Write-Host "No se encontró un binding con el puerto $dummyPort en el sitio $RetailServer." -ForegroundColor Red
+}
+
 # Usa -replace para realizar el cambio solo en la parte que te interesa
 # El patrón asegura que solo se reemplace 'ret' antes de '.axcloud.dynamics.com'
 $certName = $newHostname -replace "ret(?=\.axcloud\.dynamics\.com)", "aos"
