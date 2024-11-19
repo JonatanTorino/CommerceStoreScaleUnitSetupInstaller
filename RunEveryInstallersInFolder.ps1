@@ -1,6 +1,4 @@
-# Requires -RunAsAdministrator
-
-param (
+﻿param (
     [Parameter(Mandatory = $true)]
     [string]
     [ValidateNotNullOrEmpty()]$InstallersFoldersPath,
@@ -9,12 +7,25 @@ param (
     [ValidateSet('install', 'uninstall')]
     [ValidateNotNullOrEmpty()]$InstallOrUninstall
 )
+function Stop-WebAppPoolForce {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Name
+    )
+    
+    try {
+        Stop-WebAppPool -Name $Name -ErrorAction SilentlyContinue
+        Write-Host "Operacion de detención completada para '$Name'"
+    } catch {
+        Write-Host "El AppPool '$Name' ya está detenido."
+    }
+}
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
 if(Test-Path $InstallersFoldersPath){
-    C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:RssuCore
-    C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:RetailServer
+    Stop-WebAppPoolForce -Name RssuCore
+    Stop-WebAppPoolForce -Name RetailServer
 
     # Listas para almacenar los resultados
     $archivosTerminadosCorrectamente = @()
@@ -49,8 +60,7 @@ if(Test-Path $InstallersFoldersPath){
 
     Write-Host 
     Write-Host 
-    C:\Windows\System32\inetsrv\appcmd stop apppool /apppool.name:RssuCore
-    C:\Windows\System32\inetsrv\appcmd start apppool /apppool.name:RetailServer
+    Start-WebAppPool -Name RssuCore
     Write-Host 
     Write-Host 
 }
