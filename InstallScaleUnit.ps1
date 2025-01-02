@@ -36,8 +36,10 @@ if ($skipHostingBudle -eq $false) {
     # $url = "https://download.visualstudio.microsoft.com/download/pr/b50f2f63-23ed-4c96-9b38-71d319107d1b/26f8c79415eccaef1f2e0614e10cd701/dotnet-hosting-6.0.21-win.exe"
     # $HostingBudle = "Microsoft ASP.NET Core 6.0.26 Hosting Bundle Options"
     # $url = "https://download.visualstudio.microsoft.com/download/pr/16e13e4d-a240-4102-a460-3f4448afe1c3/3d832f15255d62bee8bc86fed40084ef/dotnet-hosting-6.0.26-win.exe"
-    $HostingBudle = "Microsoft ASP.NET Core 6.0.35 Hosting Bundle Options"
-    $url = "https://download.visualstudio.microsoft.com/download/pr/59c72253-7750-4f34-8804-4fb326754c4f/b83a6a459d49b6127757b4f873ba459f/dotnet-hosting-6.0.35-win.exe"
+    # $HostingBudle = "Microsoft ASP.NET Core 6.0.35 Hosting Bundle Options"
+    # $url = "https://download.visualstudio.microsoft.com/download/pr/59c72253-7750-4f34-8804-4fb326754c4f/b83a6a459d49b6127757b4f873ba459f/dotnet-hosting-6.0.35-win.exe"
+    $HostingBudle = "Microsoft ASP.NET Core 8.0.11 Hosting Bundle Options"
+    $url = "https://download.visualstudio.microsoft.com/download/pr/4956ec5e-8502-4454-8f28-40239428820f/e7181890eed8dfa11cefbf817c4e86b0/dotnet-hosting-8.0.11-win.exe"
     .\CheckAndDownload.ps1 $HostingBudle $url 
 }
 
