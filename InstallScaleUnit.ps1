@@ -7,8 +7,6 @@ param (
     [switch]$skipHostingBudle = $false
     ,
     [switch]$skipCheckGitRepoUpdated = $false
-    ,
-    [switch]$skipTelemetryCheck = $false
 )
 
 if (!$skipCheckGitRepoUpdated) {
@@ -22,11 +20,11 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
 }
 
-.\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
-.\CheckJsonFile.ps1 $jsonFile
-.\InsertCmmSDKDataInAxDB.ps1 $jsonFile
-.\SetApplicationInsightConfig.ps1 $jsonFile
-.\CheckRegeditEntriesDependency.ps1
+.\PreInstall\CheckJsonFile.ps1 $jsonFile
+.\PreInstall\CheckRegeditEntriesDependency.ps1
+.\PreInstall\InsertApplicationInsightConfigInAxDB.ps1 $jsonFile
+.\PreInstall\InsertCmmSDKDataInAxDB.ps1 $jsonFile
+.\PreInstall\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
 
 if ($skipHostingBudle -eq $false) {
     #Programa y versión concreta a buscar
@@ -65,24 +63,19 @@ if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
     $RetailServerAadResourceId = $json.RetailServerAadResourceId
     $CposAadClientId = $json.CposAadClientId
     $AsyncClientAadClientId = $json.AsyncClientAadClientId
-    $config = $json.ChannelConfig
+    $config = $json.CSUChannelConfig
     $IntervalAsyncClient = $json.IntervalAsyncClient
 
-    if ($skipTelemetryCheck) {
-        $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck --skipTelemetryCheck" 
-    }
-    else {
-        #Los parametros -Wait -PassThru son para el flujo del script
-        $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"    
-    }
+    #Los parametros -Wait -PassThru son para el flujo del script
+    $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "install --TrustSqlServerCertificate --port $HttpPort --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath --RetailServerCertFullPath $SslCertFullPath --RetailServerAadClientId $RetailServerAadClientId --RetailServerAadResourceId $RetailServerAadResourceId --CposAadClientId $CposAadClientId --AsyncClientAadClientId $AsyncClientAadClientId --config $config --SkipScaleUnitHealthCheck"    
 
     $process.WaitForExit()
     if ($process.ExitCode -eq 0) {
-        .\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
-        .\ChangeAsyncInterval.ps1 $IntervalAsyncClient
-        .\SetupIISWebSiteCSU.ps1 $json.RetailServerURL
-        .\ChangeDefaultTimeout.Pos.Framework.js.ps1
-        .\AddHealthCheckAndEnableSwaggerSetting.ps1
+        .\PostInstall\AddHealthCheckAndEnableSwaggerSetting.ps1
+        .\PostInstall\ChangeAsyncInterval.ps1 $IntervalAsyncClient
+        .\PostInstall\ChangeDefaultTimeout.Pos.Framework.js.ps1
+        .\PostInstall\ChangePosConfig.ps1 $json.RetailServerURL #La instalacion del RSSU posee una URL local, con este ps1 se cambia por la URL pública
+        .\PostInstall\SetupIISWebSiteCSU.ps1 $json.RetailServerURL
     }
 
 } 

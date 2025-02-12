@@ -19,20 +19,20 @@ $guardarXml = $false
 $nodeNotFoundHealthCheck = $true
 $nodeNotFoundEnableSwagger = $true
 foreach ($nodoExistente in $nodoPadre.ChildNodes) {
-    if ($nodoExistente.NodeType -ne "Comment") {
-        #HealthCheck.Extensions.ShowAssemblyFiles
-        if ($nodoExistente.GetAttribute("key") -eq "HealthCheck.Extensions.ShowAssemblyFiles") {
-            $nodeNotFoundHealthCheck = $false
-        }
+    if ($nodoExistente.NodeType -eq "Comment") { continue }
 
-        #EnableSwagger
-        if ($nodoExistente.Name -eq "add" -and $nodoExistente.GetAttribute("key") -eq "EnableSwagger") {
-            $nodeNotFoundEnableSwagger = $false
-        }
+    #HealthCheck.Extensions.ShowAssemblyFiles
+    if ($nodoExistente.GetAttribute("key") -eq "HealthCheck.Extensions.ShowAssemblyFiles") {
+        $nodeNotFoundHealthCheck = $false
+    }
 
-        if ($nodeNotFoundHealthCheck -eq $false -and $nodeNotFoundEnableSwagger -eq $false) {
-            break
-        }
+    #EnableSwagger
+    if ($nodoExistente.Name -eq "add" -and $nodoExistente.GetAttribute("key") -eq "EnableSwagger") {
+        $nodeNotFoundEnableSwagger = $false
+    }
+
+    if ($nodeNotFoundHealthCheck -eq $false -and $nodeNotFoundEnableSwagger -eq $false) {
+        break
     }
 }
 
@@ -43,6 +43,7 @@ if ($nodeNotFoundHealthCheck) {
     $nuevoNodo.SetAttribute("key", "HealthCheck.Extensions.ShowAssemblyFiles")
     $nuevoNodo.SetAttribute("value", "true")
     $nodoPadre.PrependChild($nuevoNodo)
+    Write-Host -ForegroundColor Green "Se agrego un nodo <add> con el key 'HealthCheck.Extensions.ShowAssemblyFiles'"
 
     $guardarXml = $true
 }
@@ -54,6 +55,8 @@ if ($nodeNotFoundEnableSwagger) {
     $nuevoNodo.SetAttribute("key", "EnableSwagger")
     $nuevoNodo.SetAttribute("value", "true")
     $nodoPadre.PrependChild($nuevoNodo)
+    Write-Host -ForegroundColor Green "Se agrego un nodo <add> con el key 'EnableSwagger'"
+
     $guardarXml = $true
 }
 
