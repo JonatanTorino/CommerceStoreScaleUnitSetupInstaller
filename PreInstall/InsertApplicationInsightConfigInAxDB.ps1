@@ -10,7 +10,7 @@ Write-Host "     Setting ApplicationInsight configuration in AxDB for telemtry  
 Write-Host "========================================"
 Write-Host 
 
-$GetJsonConfigFile = ".\GetJsonConfigFile.ps1"
+$GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
 $jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
 
 # Parámetros de conexión a la base de datos
@@ -25,7 +25,7 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 [string]$EnvironmentId = $json.EnvironmentId -replace '"', ''
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\setApplicationInsightConfig.sql'
+$rutaScriptSQL = '.\InsertApplicationInsightConfigInAxDB.sql'
 try {
     # Ejecutar el script SQL
     SQLCMD -S $server -E -i $rutaScriptSQL -v AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId

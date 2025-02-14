@@ -1,5 +1,3 @@
-# #Requires -RunAsAdministrator
-
 [CmdletBinding()]
 param (
     [string]$jsonFile
@@ -13,7 +11,7 @@ if (!$skipCheckGitRepoUpdated) {
     .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
 
-$GetJsonConfigFile = ".\GetJsonConfigFile.ps1"
+$GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
 $jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
 
 if ([string]::IsNullOrEmpty($jsonFile)) {
@@ -30,27 +28,24 @@ Write-Host
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
-$ScaleUnitSetupPath = $json.ScaleUnitSetupPath
-if (Test-Path -Path $ScaleUnitSetupPath -PathType Leaf) {
-    
-    $CertStore = "store:///My/LocalMachine?FindByThumbprint="
-    $Thumbprint = $json.Thumbprint
-    $SslCertFullPath = $CertStore + $Thumbprint
+$CSUSetupPath = $json.CSUSetupPath
+if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
 
-    try {
-        Stop-WebAppPool -Name 'RetailServer'
-    } catch { }
-
-    #Los parametros -Wait -PassThru son para el flujo del script
-    $process = Start-Process -FilePath $ScaleUnitSetupPath -Wait -PassThru -NoNewWindow -ArgumentList "updateCertificates --SslCertFullPath $SslCertFullPath --AsyncClientCertFullPath $SslCertFullPath  --RetailServerCertFullPath $SslCertFullPath"
-
-    $process.WaitForExit()
-
-    try {
-        Start-WebAppPool -Name 'RetailServer'
-    } catch { }
+    # # Construye el comando usando las variables
+    $command = "$CSUSetupPath updateCertificates"`
+        + " --SslCertThumbprint " + $json.Thumbprint`
+        + " --AsyncClientCertThumbprint " + $json.Thumbprint`
+        + " --RetailServerCertThumbprint " + $json.Thumbprint`
+    # Ej de como usar condicionales para concatenar parámetros
+        # + $(if ($skipOPOSCheck) { " --skipOPOSCheck"} )`
+        
+    # Ejecuta el comando
+    write-host $command
+    Invoke-Expression $command
+    # $exitCode = $LASTEXITCODE
 }
 else {
     Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
-    Write-Host -ForegroundColor Red "   $ScaleUnitSetupPath"
+    Write-Host -ForegroundColor Red "   $CSUSetupPath"
+    Write-Host -ForegroundColor Red "Revisar la configuración del json.CSUSetupPath"
 }
