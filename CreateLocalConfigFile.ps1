@@ -75,14 +75,20 @@ Write-Host "    $currentFileName"
 Write-Host "========================================"
 Write-Host
 
+Import-Module WebAdministration
+
 # Crear archivo
 $hostname = $env:COMPUTERNAME
-$jsonFile = ".\ConfigFiles\$hostname.json"
-if (-not (Test-Path $jsonFile)) {
-    Copy-Item ".\ConfigFiles\SAMPLE_Config_By_Env_(DuplicateAndRename).json" $jsonFile
+$configFolder = ".\ConfigFiles"
+$jsonFile = "$configFolder\$hostname.json"
+$fileCount = (Get-ChildItem -Path $configFolder -Filter "$hostname*" -File | Measure-Object).Count
+if ($fileCount -gt 0) {
+    Rename-Item $jsonFile -NewName "$hostname.BK$fileCount.json"
 }
+Copy-Item "$configFolder\SAMPLE_Config_By_Env_(DuplicateAndRename).json" $jsonFile
 
 # Cargar archivo
+$jsonFile = "$configFolder\$hostname.json"
 $json = Get-Content $jsonFile | ConvertFrom-Json
 
 # Seteo de configuraciones

@@ -84,5 +84,5 @@ if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
 else {
     Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
     Write-Host -ForegroundColor Red "   $CSUSetupPath"
-    Write-Host -ForegroundColor Red "Revisar la configuración del json.CSUSetupPath"
+    Write-Host -ForegroundColor Red "Revisar la configuración del json.CSUSetupPath que tenga la ruta completa al instalador"
 }

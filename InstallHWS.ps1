@@ -61,5 +61,5 @@ if (Test-Path -Path $HWSSetupPath -PathType Leaf) {
 else {
     Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
     Write-Host -ForegroundColor Red "   $HWSSetupPath"
-    Write-Host -ForegroundColor Red "Revisar la configuración del json.HWSSetupPath"
+    Write-Host -ForegroundColor Red "Revisar la configuración del json.HWSSetupPath que tenga la ruta completa al instalador"
 }

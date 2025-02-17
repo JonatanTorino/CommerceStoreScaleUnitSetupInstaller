@@ -1,10 +1,11 @@
 {
+    "__Comment1_": "La siguiente data puede ser autocompletada con el script CreateLocalConfigFile.ps1",
     "EnvironmentId": "",
     "RetailServerURL": "",
     "CPOSUrl": "",
     "Thumbprint": "",
-    "__Comment1_": "La siguiente data puede ser común a todos los entornos DEVs, la data previa puede ser diferente en cada entorno",
-    "HWSSetupPath": ".\\CSU.9.52\\CommerceHardwareStationSetup.exe",
+    "__Comment2_": "La siguiente data puede ser común a todos los entornos DEVs, la data previa puede ser diferente en cada entorno",
+    "HWSSetupPath": ".\\HWS.9.52\\CommerceHardwareStationSetup.exe",
     "HWSChannelConfig": ".\\ConfigFiles\\HardwareStationConfig.xml",
     "CSUSetupPath": ".\\CSU.9.52\\CommerceStoreScaleUnitSetup.exe",
     "CSUChannelConfig": ".\\ConfigFiles\\CommerceChannelConfig.xml",
