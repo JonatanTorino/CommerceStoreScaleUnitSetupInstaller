@@ -9,6 +9,8 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
+Import-Module .\Support\SupportFunctions.ps1
+
 if (!$skipCheckGitRepoUpdated) {
     .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
@@ -23,12 +25,8 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 # .\CheckHwsSetting.ps1 $jsonFile
 .\PreInstall\CheckRegeditEntriesDependency.ps1
 
-$currentFileName = (Get-Item $PSCommandPath).Name
-Write-Host 
-Write-Host "========================================"
-Write-Host "    $currentFileName"
-Write-Host "========================================"
-Write-Host
+Import-Module .\Support\SupportFunctions.ps1
+CurrentFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 

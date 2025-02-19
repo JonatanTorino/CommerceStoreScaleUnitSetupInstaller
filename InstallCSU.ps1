@@ -9,6 +9,8 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
+Import-Module .\Support\SupportFunctions.ps1
+
 if (!$skipCheckGitRepoUpdated) {
     .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
@@ -35,12 +37,7 @@ if ($skipHostingBudle -eq $false) {
     .\CheckAndDownload.ps1 $HostingBudle $url 
 }
 
-$currentFileName = (Get-Item $PSCommandPath).Name
-Write-Host 
-Write-Host "========================================"
-Write-Host "    $currentFileName"
-Write-Host "========================================"
-Write-Host
+CurrentFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 

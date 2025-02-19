@@ -7,6 +7,8 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
+Import-Module .\Support\SupportFunctions.ps1
+
 if (!$skipCheckGitRepoUpdated) {
     .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
@@ -20,11 +22,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 
 .\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
 
-Write-Host 
-Write-Host "========================================"
-Write-Host "     Update Certificate for CSU          "
-Write-Host "========================================"
-Write-Host 
+CurrentFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
