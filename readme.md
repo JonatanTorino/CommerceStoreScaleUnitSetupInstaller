@@ -60,7 +60,7 @@ Este directorio contiene scripts de soporte y utilidades.
 
 ## Instrucciones de Uso
 
-1. **Preparar el archivo de configuración JSON**: Copie y renombre el archivo `SAMPLE_Config_By_Env_(DuplicateAndRename).json` en el directorio `ConfigFiles` con el nombre del entorno (Hostname).
+1. **Preparar el archivo de configuración JSON**: Ejecute el script `CreateLocalConfigFile.ps1` para crear el archivo automáticamente (este hace backup de existir un archivo previo), o manualmente copie y renombre el archivo `SAMPLE_Config_By_Env_(DuplicateAndRename).json` en el directorio `ConfigFiles` con el nombre del entorno (Hostname). Si ya contaba con un archivo previo, pase las configuraciones faltantes desde el backup al nuevo.
 2. **Ejecutar el script de instalación**: Use `InstallCSU.ps1` para instalar el Commerce Scale Unit y `InstallHWS.ps1` para instalar el Hardware Station.
 3. **Scripts de soporte**: Utilice los scripts en el directorio `Support` para verificar dependencias y actualizar configuraciones según sea necesario.
 
