@@ -32,12 +32,16 @@ if(Test-Path $InstallersFoldersPath){
     $archivosTerminadosConError = @()
 
     Get-ChildItem -Path $InstallersFoldersPath -Filter *.exe | ForEach-Object {
-        Write-Host
-        Write-Host
-        Write-Host -ForegroundColor Green $_.name "|" $InstallOrUninstall
-        Start-Process -NoNewWindow -Wait $_.Fullname -ArgumentList $InstallOrUninstall
-
         $nombreArchivo = $_.Name
+        Write-Host
+        Write-Host
+        Write-Host -ForegroundColor Green $nombreArchivo "|" $InstallOrUninstall
+
+        # Construye el comando usando las variables
+        $command = $_.Fullname + " $InstallOrUninstall"
+        # Ejecuta el comando y captura la salida y el código de salida
+        Invoke-Expression $command
+
         # Verificar el código de salida
         if ($LASTEXITCODE -eq 0) {
             Write-Host "$nombreArchivo terminó correctamente."
