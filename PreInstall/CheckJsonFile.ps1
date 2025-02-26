@@ -19,7 +19,7 @@ if (-not (Test-Path $jsonFile)) {
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
 #Inicializo cada variable del json
-$ChannelConfig = $json.ChannelConfig
+$ChannelConfig = $json.CSUChannelConfig
 
 #Inicializo las URLs de los MenuItems que se van usar.
 $bindingsList = Get-IISSiteBinding "AOSService"
