@@ -10,7 +10,7 @@ param (
 Import-Module .\Support\SupportFunctions.ps1
 
 if (!$skipCheckGitRepoUpdated) {
-    .\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
+    .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
 
 $GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
