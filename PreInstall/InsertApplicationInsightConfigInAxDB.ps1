@@ -25,7 +25,7 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 [string]$EnvironmentId = $json.EnvironmentId -replace '"', ''
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\InsertApplicationInsightConfigInAxDB.sql'
+$rutaScriptSQL = '.\PreInstall\InsertApplicationInsightConfigInAxDB.sql'
 try {
     # Ejecutar el script SQL
     SQLCMD -S $server -E -i $rutaScriptSQL -v AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId

@@ -36,7 +36,7 @@ $StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathS
 [string]$CPOSURL='"'+$json.CPOSUrl+'"'
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\InsertCmmSDKAzureActiveClientId.sql'
+$rutaScriptSQL = '.\PreInstall\InsertCmmSDKAzureActiveClientId.sql'
 
     try {
         # Ejecutar el script SQL
@@ -47,7 +47,7 @@ $rutaScriptSQL = '.\InsertCmmSDKAzureActiveClientId.sql'
     }
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\InsertCmmSDKProfileConfig.sql'
+$rutaScriptSQL = '.\PreInstall\InsertCmmSDKProfileConfig.sql'
 
     try {
         # Ejecutar el script SQL
