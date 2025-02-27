@@ -34,10 +34,13 @@ if ($skipHostingBudle -eq $false) {
     # $url = "https://download.visualstudio.microsoft.com/download/pr/59c72253-7750-4f34-8804-4fb326754c4f/b83a6a459d49b6127757b4f873ba459f/dotnet-hosting-6.0.35-win.exe"
     $HostingBudle = "Microsoft ASP.NET Core 8.0.11 Hosting Bundle Options"
     $url = "https://download.visualstudio.microsoft.com/download/pr/4956ec5e-8502-4454-8f28-40239428820f/e7181890eed8dfa11cefbf817c4e86b0/dotnet-hosting-8.0.11-win.exe"
-    .\CheckAndDownload.ps1 $HostingBudle $url 
+    .\Support\CheckAndDownload.ps1 $HostingBudle $url 
 }
 
-CurrentFileName $MyInvocation.MyCommand.Name
+Import-Module .\Support\SupportFunctions.ps1
+$scriptName = $MyInvocation.MyCommand.Name
+Write-Host "Ejecutando script: $scriptName"
+CurrentFileName $scriptName
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
@@ -52,7 +55,7 @@ if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
     # # Construye el comando usando las variables
     $command = "$CSUSetupPath install"`
         + " --Config `"$config`""`
-        + " --port " + $json.HttpPort`
+        + " --port " + $json.CSUHttpPort`
         + " --SslCertThumbprint " + $json.Thumbprint`
         + " --AsyncClientCertThumbprint " + $json.Thumbprint`
         + " --RetailServerCertThumbprint " + $json.Thumbprint`
@@ -67,7 +70,7 @@ if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
 
     # Ejecuta el comando
     write-host $command
-    Invoke-Expression $command
+    # Invoke-Expression $command
     $exitCode = $LASTEXITCODE
     
     if ($exitCode -eq 0) {
