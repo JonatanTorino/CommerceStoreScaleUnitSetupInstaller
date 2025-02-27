@@ -70,7 +70,7 @@ if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
 
     # Ejecuta el comando
     write-host $command
-    # Invoke-Expression $command
+    Invoke-Expression $command
     $exitCode = $LASTEXITCODE
     
     if ($exitCode -eq 0) {
