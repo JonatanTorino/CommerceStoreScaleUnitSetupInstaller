@@ -26,12 +26,36 @@ $json.Thumbprint = GetWebSiteCertThumbprint("AOSService")
 
 # Cargar archivo backup para recuperar algunas propiedades
 if ($fileCount -gt 0) {
-    $jsonBackup = Get-Content $jsonBackupFile | ConvertFrom-Json
-    $json.HWSSetupPath = $jsonBackup.HWSSetupPath
-    $json.HWSChannelConfig = $jsonBackup.HWSChannelConfig
-    $json.CSUSetupPath = $jsonBackup.CSUSetupPath
-    $json.CSUChannelConfig = $jsonBackup.CSUChannelConfig
-    $json.CSUHttpPort = $jsonBackup.CSUHttpPort
+    $jsonBackup = Get-Content "$configFolder\$jsonBackupFile" | ConvertFrom-Json
+    
+    # Versión anterior del json
+    if ($null -ne $jsonBackup.ScaleUnitSetupPath) {
+        $json.CSUSetupPath = $jsonBackup.ScaleUnitSetupPath
+    }
+    if ($null -ne $jsonBackup.ChannelConfig) {
+        $json.CSUChannelConfig = $jsonBackup.ChannelConfig
+    }
+    if ($null -ne $jsonBackup.HttpPort) {
+        $json.CSUHttpPort = $jsonBackup.HttpPort
+    }
+
+    #Versión nueva del json
+    if ($null -ne $jsonBackup.HWSSetupPath) {
+        $json.HWSSetupPath = $jsonBackup.HWSSetupPath
+    }
+    if ($null -ne $jsonBackup.HWSChannelConfig) {
+        $json.HWSChannelConfig = $jsonBackup.HWSChannelConfig
+    }
+    if ($null -ne $jsonBackup.CSUSetupPath) {
+        $json.CSUSetupPath = $jsonBackup.CSUSetupPath
+    }
+    if ($null -ne $jsonBackup.CSUChannelConfig) {
+        $json.CSUChannelConfig = $jsonBackup.CSUChannelConfig
+    }
+    if ($null -ne $jsonBackup.CSUHttpPort) {
+        $json.CSUHttpPort = $jsonBackup.CSUHttpPort
+    }
+    
     $json.TelemetryAppName = $jsonBackup.TelemetryAppName
     $json.AppInsightsInstrumentationKey = $jsonBackup.AppInsightsInstrumentationKey
     $json.RetailServerAadClientId = $jsonBackup.RetailServerAadClientId
