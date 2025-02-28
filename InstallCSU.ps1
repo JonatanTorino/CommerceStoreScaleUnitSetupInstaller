@@ -50,7 +50,7 @@ if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
     Unblock-File -Path $CSUSetupPath
 
     $config = $json.CSUChannelConfig
-    $RetailServerAadResourceId = "api://" + $json.RetailServerAadResourceId
+    $RetailServerAadResourceId = "api://" + $json.RetailServerAadClientId
     
     # # Construye el comando usando las variables
     $command = "$CSUSetupPath install"`
