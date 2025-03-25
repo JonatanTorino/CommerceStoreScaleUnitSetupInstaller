@@ -20,7 +20,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
 }
 
-.\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
+.\Support\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
 
 CurrentFileName $MyInvocation.MyCommand.Name
 
