@@ -9,7 +9,7 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
-Import-Module .\Support\SupportFunctions.ps1
+. .\Support\SupportFunctions.ps1
 
 if (!$skipCheckGitRepoUpdated) {
     .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
@@ -25,7 +25,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 .\PreInstall\CheckRegeditEntriesDependency.ps1
 .\PreInstall\HWSCheckConfigSetting.ps1 $jsonFile
 
-Import-Module .\Support\SupportFunctions.ps1
+. .\Support\SupportFunctions.ps1
 CurrentFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
@@ -39,7 +39,7 @@ if (Test-Path -Path $HWSSetupPath -PathType Leaf) {
     
     [xml]$HwsConfigXml = Get-Content $config
     $xPathHardwareStationHttpsPort = "/configuration/appSettings/add[@key='HardwareStationHttpsPort']/@value"
-    $HWSPort = Select-Xml -Xml $HwsConfigXml -XPath $xPathHardwareStationHttpsPort.Node.Value
+    $HWSPort = (Select-Xml -Xml $HwsConfigXml -XPath $xPathHardwareStationHttpsPort).Node.Value
 
     # Construye el comando usando las variables
     $command = "$HWSSetupPath install --Config `"$config`""`
@@ -49,7 +49,7 @@ if (Test-Path -Path $HWSSetupPath -PathType Leaf) {
         # + $(if ($skipOPOSCheck) { " --skipOPOSCheck"} )`
 
     # Ejecuta el comando y captura la salida y el código de salida
-    write-host $command
+    write-host $command -ForegroundColor Blue
     Invoke-Expression $command
     $exitCode = $LASTEXITCODE
 

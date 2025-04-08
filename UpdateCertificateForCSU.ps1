@@ -7,7 +7,7 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
-Import-Module .\Support\SupportFunctions.ps1
+. .\Support\SupportFunctions.ps1
 
 if (!$skipCheckGitRepoUpdated) {
     .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual

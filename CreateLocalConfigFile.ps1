@@ -1,4 +1,4 @@
-Import-Module .\Support\SupportFunctions.ps1
+. .\Support\SupportFunctions.ps1
 CurrentFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo

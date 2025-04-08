@@ -9,7 +9,7 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
-Import-Module .\Support\SupportFunctions.ps1
+. .\Support\SupportFunctions.ps1
 
 if (!$skipCheckGitRepoUpdated) {
     .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
@@ -37,7 +37,7 @@ if ($skipHostingBudle -eq $false) {
     .\Support\CheckAndDownload.ps1 $HostingBudle $url 
 }
 
-Import-Module .\Support\SupportFunctions.ps1
+. .\Support\SupportFunctions.ps1
 $scriptName = $MyInvocation.MyCommand.Name
 Write-Host "Ejecutando script: $scriptName"
 CurrentFileName $scriptName
