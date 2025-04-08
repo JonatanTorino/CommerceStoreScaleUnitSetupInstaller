@@ -21,7 +21,7 @@ Este directorio contiene scripts que han sido discontinuados.
 
 Este directorio contiene scripts que se ejecutan antes de la instalación principal.
 
-- `CheckJsonFile.ps1`: Verifica que el archivo JSON de configuración tenga todos los datos necesarios.
+- `CSUCheckJsonFile.ps1`: Verifica que el archivo JSON de configuración tenga todos los datos necesarios.
 - `CheckRegeditEntriesDependency.ps1`: Ajusta las claves del registro para el uso de TLS.
 - `InsertApplicationInsightConfigInAxDB.ps1`: Configura Application Insight en AxDB para telemetría.
 - `InsertApplicationInsightConfigInAxDB.sql`: Script SQL para insertar la configuración de Application Insight en AxDB.
@@ -30,6 +30,7 @@ Este directorio contiene scripts que se ejecutan antes de la instalación princi
 - `InsertCmmSDKDataInAxDB.ps1`: Inserta datos de configuración en AxDB.
 - `InsertCmmSDKProfileConfig.sql`: Script SQL para insertar la configuración del perfil en AxDB.
 - `ReplaceXmlAppInsightsInstrumentationKey.ps1`: Reemplaza las claves de AppInsightsInstrumentation en el archivo XML de configuración.
+- `HWSCheckConfigSetting.ps1`: Configura y valida las configuraciones del Hardware Station en el archivo XML al que hace referencia el JSON de entrada. Este archivo es el descargado desde la tienda de BackOffice.
 
 ### PostInstall
 

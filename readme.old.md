@@ -13,7 +13,7 @@ Descripción de cada script en orden de ejecución:
 **InstallScaleUnit.ps1**
 Este script invoca a los demás scripts en el orden necesario para la instalación, invocando a scripts que realizan chequeos de dependencias para la instalación, así como a otros posteriores que ajustan valores que vienen por defecto en la instalación.
 
-**CheckJsonFile.ps1**
+**CSUCheckJsonFile.ps1**
 Se controla que el archivo json con los parámetros de instalación tenga todos los datos necesarios para continuar.
 
 **InsertCmmSDKAzureActiveClientId.ps1**

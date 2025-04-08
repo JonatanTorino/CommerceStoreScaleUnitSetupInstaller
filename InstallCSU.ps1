@@ -22,7 +22,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
 }
 
-.\PreInstall\CheckJsonFile.ps1 $jsonFile
+.\PreInstall\CSUCheckJsonFile.ps1 $jsonFile
 .\PreInstall\CheckRegeditEntriesDependency.ps1
 .\PreInstall\InsertApplicationInsightConfigInAxDB.ps1 $jsonFile
 .\PreInstall\InsertCmmSDKDataInAxDB.ps1 $jsonFile

@@ -22,8 +22,8 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
 }
 
-# .\CheckHwsSetting.ps1 $jsonFile
 .\PreInstall\CheckRegeditEntriesDependency.ps1
+.\PreInstall\HWSCheckConfigSetting.ps1 $jsonFile
 
 Import-Module .\Support\SupportFunctions.ps1
 CurrentFileName $MyInvocation.MyCommand.Name
@@ -36,11 +36,15 @@ if (Test-Path -Path $HWSSetupPath -PathType Leaf) {
     Unblock-File -Path $HWSSetupPath
     $config = $json.HWSChannelConfig
     $RetailServerURL = $json.RetailServerURL
+    
+    [xml]$HwsConfigXml = Get-Content $config
+    $xPathHardwareStationHttpsPort = "/configuration/appSettings/add[@key='HardwareStationHttpsPort']/@value"
+    $HWSPort = Select-Xml -Xml $HwsConfigXml -XPath $xPathHardwareStationHttpsPort.Node.Value
 
     # Construye el comando usando las variables
     $command = "$HWSSetupPath install --Config `"$config`""`
                 + " --csuurl `"$RetailServerURL`"" `
-                + "--port 451"`
+                + "--port $HWSPort"`
     # Ej de como usar condicionales para concatenar parámetros
         # + $(if ($skipOPOSCheck) { " --skipOPOSCheck"} )`
 
