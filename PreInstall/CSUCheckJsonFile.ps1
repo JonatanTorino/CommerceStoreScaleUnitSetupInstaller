@@ -21,22 +21,18 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 #Inicializo cada variable del json
 $ChannelConfig = $json.CSUChannelConfig
 
-#Inicializo las URLs de los MenuItems que se van usar.
-$bindingsList = Get-IISSiteBinding "AOSService"
-$urlBinding = ""
-foreach ($binding in $bindingsList | Where-Object -Property bindingInformation -like "*aos.*") {
-    #Write-Host "guardar uri en una variable < "$binding.bindingInformation 
-    $urlBinding = $binding.Host
-}
-$url = "https://$urlBinding"
-$miRetailCDXDataStore = $url + "/?mi=RetailCDXDataStore&lng=en-us"
-
 #Comprobamos existencia del xml del ChannelConfig obtenido de D365FO
 if (-not (Test-Path $ChannelConfig)) {
     Write-Host -ForegroundColor Yellow "Falta especificar o descargar el archivo XMl de ChannelConfig"
     Write-Host -ForegroundColor Yellow "Se descarga desde la ruta"
     Write-Host -ForegroundColor Yellow "D365FO > Retail and commerce > Headquarters setup > Commerce scheduler > Channel database"
     Pause
+    
+#Inicializo las URLs de los MenuItems que se van usar.
+    Import-Module .\Support\SupportFunctions.ps1
+    $url = GetWebSiteUrl("AOSService") 
+    $miRetailCDXDataStore = $url + "/?mi=RetailStoreTable&lng=en-us"
+
     Start-Process $miRetailCDXDataStore
     throw [System.IO.FileNotFoundException] "$ChannelConfig not found."
 }

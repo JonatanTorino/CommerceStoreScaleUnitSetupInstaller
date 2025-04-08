@@ -21,6 +21,29 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 #Inicializo cada variable del json
 $config = $json.HWSChannelConfig
 
+#Comprobamos existencia del xml del ChannelConfig obtenido de D365FO
+if (-not (Test-Path $ChannelConfig)) {
+    Write-Host -ForegroundColor Yellow "Falta especificar o descargar el archivo XMl de HwsConfig"
+    Write-Host -ForegroundColor Yellow "Se descarga desde la ruta"
+    Write-Host -ForegroundColor Yellow "D365FO > Retail and Commerce > Channels > Stores > All stores > Hardware station > [Store] > Hardware stations"
+    Pause
+    
+#Inicializo las URLs de los MenuItems que se van usar.
+    Import-Module .\Support\SupportFunctions.ps1
+    $url = GetWebSiteUrl("AOSService") 
+    $miRetailStoreTable = $url + "/?mi=RetailStoreTable&lng=en-us"
+
+    Start-Process $miRetailStoreTable
+    throw [System.IO.FileNotFoundException] "$ChannelConfig not found."
+}
+
+# Comprobar si se usa un certificado local o se considera una VM Cloud de desarrollo
+$HwsIsLocalCertificate = $json.HWSIsLocalCertificate
+if ($null -eq $HwsIsLocalCertificate)
+{
+    throw "Al archivo $jsonFile le falta la propiedad booleana HWSIsLocalCertificate."
+}
+
 [xml]$HwsConfigXml = Get-Content $config
 
 # Obtengo el nodo 'add' con key='HardwareStationCertificateThumbprint' para extraer el atributo 'value'
