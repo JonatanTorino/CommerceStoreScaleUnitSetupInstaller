@@ -4,12 +4,8 @@ param (
     [ValidateNotNullOrEmpty()]$jsonFile
 )
 
-$currentFileName = (Get-Item $PSCommandPath).Name
-Write-Host 
-Write-Host "========================================"
-Write-Host "    $currentFileName"
-Write-Host "========================================"
-Write-Host
+. .\Support\SupportFunctions.ps1
+PrintFileName $MyInvocation.MyCommand.Name
 
 #Parseo el archivo json para leer sus propiedades
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json

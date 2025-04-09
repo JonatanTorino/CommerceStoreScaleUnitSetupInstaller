@@ -8,12 +8,8 @@ param ( #Recibir valor en este formato 00:01:00
     [ValidateNotNullOrEmpty()]$newInterval
 ) 
 
-$currentFileName = (Get-Item $PSCommandPath).Name
-Write-Host 
-Write-Host "========================================"
-Write-Host "    $currentFileName"
-Write-Host "========================================"
-Write-Host 
+. .\Support\SupportFunctions.ps1
+PrintFileName $MyInvocation.MyCommand.Name
 
 $pathFile = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Microsoft\AsyncClient\AsyncClientService.exe.config"
 

@@ -8,12 +8,8 @@ param ( #Recibir valor en este formato 00:01:00
 [ValidateNotNullOrEmpty()]$retailServerURL
 ) 
 
-$currentFileName = (Get-Item $PSCommandPath).Name
-Write-Host 
-Write-Host "========================================"
-Write-Host "    $currentFileName"
-Write-Host "========================================"
-Write-Host 
+. .\Support\SupportFunctions.ps1
+PrintFileName $MyInvocation.MyCommand.Name
 
 # Usa el objeto System.Uri para obtener el hostname
 $uri = [System.Uri]::new($retailServerURL)
