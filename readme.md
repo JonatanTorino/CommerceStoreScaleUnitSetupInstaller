@@ -9,6 +9,8 @@ Este repositorio contiene varios scripts para la instalación inicial de un Comm
 Este directorio contiene archivos de configuración necesarios para la instalación.
 
 - `SAMPLE_Config_By_Env_(DuplicateAndRename).json`: Archivo de configuración de muestra que debe ser duplicado y renombrado según el entorno.
+- `CommerceChannelConfig.xml`: Archivo XML de configuración del canal de comercio.
+- `HardwareStationConfig.xml`: Archivo XML de configuración del Hardware Station.
 
 ### Deprecados
 
@@ -49,15 +51,17 @@ Este directorio contiene scripts de soporte y utilidades.
 - `CheckAndDownload.ps1`: Verifica si un componente está instalado y lo descarga si no lo está.
 - `CheckGitRepoUpdated.ps1`: Verifica si el repositorio Git está actualizado.
 - `GetJsonConfigFile.ps1`: Obtiene el archivo JSON de configuración.
+- `Install-IIS.ps1`: Habilita características de IIS necesarias para la instalación.
+- `RunEveryInstallersInFolder.ps1`: Ejecuta todos los instaladores de extensiones en una carpeta.
+- `SupportFunctions.ps1`: Contiene funciones de soporte reutilizables.
 
 ### Scripts Principales
 
-- `CreateLocalConfigFile.ps1`: Crea un archivo de configuración a partir del archivo SAMPLE.json, completando valores que puede recuperados localmente del entorno. No puede completar los AppId o InstrumentationKey.
+- `CreateLocalConfigFile.ps1`: Crea un archivo de configuración a partir del archivo SAMPLE.json, completando valores que pueden ser recuperados localmente del entorno. Los AppId o InstrumentationKey los copia de un archivo de configuración previo si llega a existir.
 - `InstallCSU.ps1`: Orquesta la instalación del Commerce Scale Unit.
 - `InstallHWS.ps1`: Orquesta la instalación del Hardware Station.
-- `Support/RunEveryInstallersInFolder.ps1`: Ejecuta todos los instaladores de extensiones en una carpeta.
 - `UpdateAfterRefreshDB.ps1`: Actualiza la configuración después de refrescar la base de datos.
-- `UpdateCertificates.ps1`: Actualiza los certificados para CSU. (Útil cuando se hace una rotación de certificados).
+- `UpdateCertificateForCSU.ps1`: Actualiza los certificados para CSU. (Útil cuando se hace una rotación de certificados).
 
 ## Instrucciones de Uso
 

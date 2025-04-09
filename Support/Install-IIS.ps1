@@ -1,0 +1,1 @@
+Dism /Online /Enable-Feature /FeatureName:IIS-DefaultDocument /All /NoRestart
