@@ -7,6 +7,7 @@
     "__Comment2_": "La siguiente data puede ser común a todos los entornos DEVs, la data previa puede ser diferente en cada entorno",
     "HWSSetupPath": ".\\HWS.9.52\\CommerceHardwareStationSetup.exe",
     "HWSChannelConfig": ".\\ConfigFiles\\HardwareStationConfig.xml",
+    "HWSIsLocalCertificate": false,
     "CSUSetupPath": ".\\CSU.9.52\\CommerceStoreScaleUnitSetup.exe",
     "CSUChannelConfig": ".\\ConfigFiles\\CommerceChannelConfig.xml",
     "CSUHttpPort": "446",

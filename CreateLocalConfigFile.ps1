@@ -1,5 +1,5 @@
 . .\Support\SupportFunctions.ps1
-CurrentFileName $MyInvocation.MyCommand.Name
+PrintFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo
 $hostname = $env:COMPUTERNAME

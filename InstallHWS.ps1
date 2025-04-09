@@ -26,7 +26,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 .\PreInstall\HWSCheckConfigSetting.ps1 $jsonFile
 
 . .\Support\SupportFunctions.ps1
-CurrentFileName $MyInvocation.MyCommand.Name
+PrintFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 

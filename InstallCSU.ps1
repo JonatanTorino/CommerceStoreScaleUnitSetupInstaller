@@ -38,9 +38,7 @@ if ($skipHostingBudle -eq $false) {
 }
 
 . .\Support\SupportFunctions.ps1
-$scriptName = $MyInvocation.MyCommand.Name
-Write-Host "Ejecutando script: $scriptName"
-CurrentFileName $scriptName
+PrintFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 

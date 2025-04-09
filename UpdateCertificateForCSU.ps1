@@ -22,7 +22,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 
 .\PreInstall\InsertCmmSDKAzureActiveClientId.ps1 $jsonFile
 
-CurrentFileName $MyInvocation.MyCommand.Name
+PrintFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 

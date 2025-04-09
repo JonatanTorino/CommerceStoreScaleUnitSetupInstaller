@@ -63,6 +63,23 @@ function GetWebSiteUrl {
     return $url
 }
 
+function GetAosServiceUrl {
+    [string]$webSite = "AOSService"
+    
+    # Obtiene la información del sitio web
+    $sitio = Get-WebSite -Name $webSite
+
+    # Obtiene el binding principal
+    $bindings = $sitio.bindings
+    $binding = $bindings.Collection | Where-Object { $_.bindingInformation -match "aos\." } | Select-Object -First 1
+    
+    # Usar una expresión regular para extraer el host y el puerto
+    $hostSegment = [regex]::Match($binding.bindingInformation, ':\d+:(.+)$').Groups[1].Value
+    $protocol = $binding.protocol
+    $url =  $protocol + "://" + $hostSegment
+    return $url
+}
+
 function GetWebSiteCertThumbprint {
     param (
         [string]$webSite = "AOSService"
@@ -80,7 +97,7 @@ function GetWebSiteCertThumbprint {
     return $certificado
 }
 
-function CurrentFileName {
+function PrintFileName {
     param (
         $currentFileName
     )
@@ -90,4 +107,84 @@ function CurrentFileName {
     Write-Host "    $currentFileName"
     Write-Host "========================================"
     Write-Host
+}
+
+function GetLocalHostNameCertificateThumbprint {
+    # Obtener el nombre del host local
+    $localHostName = $env:COMPUTERNAME  # o [System.Net.Dns]::GetHostName()
+    Write-Host -ForegroundColor Green "Nombre del host local: $localHostName"
+    
+    # Obtener el certificado utilizando el nombre amigable
+    $localhostCertThumbprint = GetCertificateThumbprint -friendlyName $localHostName
+    
+    if ($null -ne $localhostCertThumbprint) {
+        Write-Host -ForegroundColor Green "Certificado '$localHostName' encontrado o creado: $localhostCertThumbprint"
+        return $localhostCertThumbprint
+    } else {
+        Write-Host -ForegroundColor Red "No se pudo obtener o crear un certificado para '$localHostName'."
+        return $null
+    }
+}
+
+function GetCertificateThumbprint {
+    param (
+        [string]$friendlyName
+    )
+
+    $cert = GetCertificate -friendlyName $friendlyName
+
+    # Buscar un certificado con el Friendly Name especificado
+    $cert = $cert | Where-Object { $_.FriendlyName -eq $friendlyName } | Select-Object -First 1
+    return $cert.Thumbprint
+}
+
+function GetCertificate {
+    param (
+        [string]$friendlyName
+    )
+    
+    # Buscar un certificado con el Friendly Name especificado
+    $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object { $_.FriendlyName -eq $friendlyName }
+        
+    if ($null -ne $cert) {
+        Write-Host -ForegroundColor Green "Certificado '$friendlyName' encontrado: $($cert.Thumbprint)"
+    } else {
+        Write-Host -ForegroundColor Red "Certificado con el Friendly Name '$friendlyName' no encontrado."
+        CreateNewCertificate -friendlyName $friendlyName
+
+        $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object { $_.FriendlyName -eq $friendlyName } 
+                
+        if ($null -ne $cert) {
+            Write-Host -ForegroundColor Green "Certificado '$friendlyName' creado: $($cert.Thumbprint)"
+        } else {
+            Write-Host -ForegroundColor Red "Error al crear el certificado '$friendlyName'."
+        }
+    }
+
+    return $cert
+}
+
+function CreateNewCertificate {
+    param (
+        [string]$friendlyName
+    )
+    
+    Write-Host -ForegroundColor Yellow "Creando un nuevo certificado autofirmado para '$friendlyName'."
+        
+    # Crear un nuevo certificado autofirmado con Key Usage y Extended Key Usage
+    $certNew = New-SelfSignedCertificate -DnsName $friendlyName `
+        -CertStoreLocation Cert:\LocalMachine\My `
+        -KeyLength 2048 `
+        -NotAfter (Get-Date).AddYears(5) `
+        -FriendlyName $friendlyName `
+        -KeyUsage DigitalSignature, KeyEncipherment, DataEncipherment `
+        -KeyExportPolicy Exportable `
+        -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.1") # Extended Key Usage: Server Authentication
+
+    # Importar el certificado al almacén de Trusted Root Certification Authorities
+    $rootStore = "Cert:\LocalMachine\Root"
+    Write-Host -ForegroundColor Yellow "Importando el certificado al almacén de Trusted Root Certification Authorities."
+    $certNew | Export-Certificate -FilePath "$env:TEMP\$friendlyName.cer" -Force
+    Import-Certificate -FilePath "$env:TEMP\$friendlyName.cer" -CertStoreLocation $rootStore
+    Remove-Item -Path "$env:TEMP\$friendlyName.cer" -Force
 }
