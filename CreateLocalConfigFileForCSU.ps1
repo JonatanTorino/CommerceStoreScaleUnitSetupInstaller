@@ -2,7 +2,7 @@
 PrintFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo usando función reutilizable
-$jsonFile = Create-LocalConfigFile -ComponentSuffix "CSU"
+$jsonFile = New-LocalConfigFile -ComponentSuffix "CSU"
 
 # Cargar archivo
 $json = Get-Content $jsonFile | ConvertFrom-Json
