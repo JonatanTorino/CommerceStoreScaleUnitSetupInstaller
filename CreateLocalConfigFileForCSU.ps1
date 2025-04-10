@@ -1,18 +1,8 @@
 . .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
 
-# Crear archivo
-$hostname = $env:COMPUTERNAME
-$configFolder = ".\ConfigFiles"
-$configFile = "$hostname.CSU"
-$jsonFile = "$configFolder\$configFile.json"
-$fileCount = (Get-ChildItem -Path $configFolder -Filter "$hostname*" -File | Measure-Object).Count
-$jsonBackupFile = ""
-if ($fileCount -gt 0) {
-    $jsonBackupFile = "$hostname.BK$fileCount.json"
-    Rename-Item $jsonFile -NewName $jsonBackupFile
-}
-Copy-Item "$configFolder\SAMPLE_Config_By_Env_(DuplicateAndRename).CSU.json" $jsonFile
+# Crear archivo usando función reutilizable
+$jsonFile = Create-LocalConfigFile -ComponentSuffix "CSU"
 
 # Cargar archivo
 $json = Get-Content $jsonFile | ConvertFrom-Json

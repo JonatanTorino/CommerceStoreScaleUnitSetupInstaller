@@ -5,7 +5,12 @@
 $ModuleVersion = "1.0.1"
 $Author = "Jonatan Torino"
 
-Import-Module WebAdministration
+# Verificar si el módulo WebAdministration está disponible y cargarlo si existe
+if (Get-Module -ListAvailable -Name WebAdministration) {
+    Import-Module WebAdministration
+} else {
+    Write-Host -ForegroundColor Yellow "El módulo WebAdministration no está disponible. Algunas funciones pueden no estar operativas."
+}
 
 function GetEnvironmentId {
     param (
@@ -275,4 +280,90 @@ function HasInstalledIIS {
     # Opcionalmente, puedes usar la variable $iisInstalled para lógica posterior
     # if ($iisInstalled) { # Hacer algo } else { # Hacer otra cosa }
     return $iisInstalled
+}
+
+function Create-LocalConfigFileIA {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$ComponentSuffix,
+
+        [Parameter(Mandatory=$false)]
+        [string]$ConfigFolder = ".\ConfigFiles",
+
+        [Parameter(Mandatory=$false)]
+        [string]$SampleFileNameBase = "SAMPLE_Config_By_Env_(DuplicateAndRename)"
+    )
+
+    $hostname = $env:COMPUTERNAME
+    $configFileBaseName = "$hostname.$ComponentSuffix"
+    $jsonFile = Join-Path -Path $ConfigFolder -ChildPath "$configFileBaseName.json"
+    $sampleFile = Join-Path -Path $ConfigFolder -ChildPath "$SampleFileNameBase.$ComponentSuffix.json"
+
+    # Ensure the configuration directory exists
+    if (-not (Test-Path -Path $ConfigFolder -PathType Container)) {
+        New-Item -Path $ConfigFolder -ItemType Directory -Force | Out-Null
+    }
+
+    # Check if the sample file exists before proceeding
+    if (-not (Test-Path -LiteralPath $sampleFile -PathType Leaf)) {
+        throw "Sample configuration file not found: $sampleFile"
+    }
+
+    # Check for existing config file and back it up
+    if (Test-Path -LiteralPath $jsonFile -PathType Leaf) {
+        $backupFilePattern = "$configFileBaseName.BK*.json"
+        $existingBackups = Get-ChildItem -Path $ConfigFolder -Filter $backupFilePattern -File -ErrorAction SilentlyContinue
+        $maxBackupNum = 0
+        if ($existingBackups) {
+             $existingBackups | ForEach-Object {
+                if ($_.Name -match '\.BK(\d+)\.json$') {
+                    $num = [int]$matches[1]
+                    if ($num -gt $maxBackupNum) {
+                        $maxBackupNum = $num
+                    }
+                }
+            }
+        }
+        $nextBackupNum = $maxBackupNum + 1
+        $jsonBackupFile = Join-Path -Path $ConfigFolder -ChildPath "$configFileBaseName.BK$nextBackupNum.json"
+        Rename-Item -LiteralPath $jsonFile -NewName $jsonBackupFile -Force
+    }
+
+    # Copy the sample file to the target file path
+    Copy-Item -LiteralPath $sampleFile -Destination $jsonFile -Force
+
+    # Return the full path to the newly created/copied config file
+    return $jsonFile
+}
+
+
+function Create-LocalConfigFile {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [string]$ComponentSuffix
+    )
+
+    $sampleFileNameBase = "SAMPLE_Config_By_Env_(DuplicateAndRename)"
+
+    $hostname = $env:COMPUTERNAME
+    $configFolder = ".\ConfigFiles"
+    $configFile = "$hostname.$ComponentSuffix"
+    $jsonFile = "$configFolder\$configFile.json"
+    
+    # Creo una copia de backup de existir una versión actual
+    $fileCount = (Get-ChildItem -Path $configFolder -Filter "$configFile*" -File | Measure-Object).Count
+    if ($fileCount -gt 0) {
+        $jsonBackupFile = "$configFile.BK$fileCount.json"
+        Rename-Item $jsonFile -NewName $jsonBackupFile
+    }
+
+    # Copy the sample file to the target file path
+    Copy-Item -LiteralPath "$configFolder\$sampleFileNameBase.$ComponentSuffix.json" -Destination $jsonFile -Force
+
+    # Return the full path to the newly created/copied config file
+    return $jsonFile
 }
