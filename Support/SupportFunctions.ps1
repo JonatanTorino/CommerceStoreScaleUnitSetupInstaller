@@ -2,14 +2,33 @@
 # Descripción: Módulo con funciones de soporte reutilizables
 
 # Definir información del módulo
-$ModuleVersion = "1.0.1"
-$Author = "Jonatan Torino"
+# $ModuleVersion = "1.0.1"
+# $Author = "Jonatan Torino"
 
-# Verificar si el módulo WebAdministration está disponible y cargarlo si existe
-if (Get-Module -ListAvailable -Name WebAdministration) {
-    Import-Module WebAdministration
+function Get-OSInfo {
+    # Determinar si es un sistema operativo de servidor o cliente
+    $osInfo = Get-CimInstance Win32_OperatingSystem
+    $isServerOS = $osInfo.ProductType -ne 1 # 1 = Workstation, 2 = Domain Controller, 3 = Member Server
+    return $isServerOS
+}
+
+# Assign the result of Get-OSInfo to $isServerOS (consolidated)
+$isServerOS = Get-OSInfo
+
+if ($isServerOS) {
+    # En Windows Server, usar el módulo WebAdministration
+    if (Get-Module -ListAvailable -Name WebAdministration) {
+        Import-Module WebAdministration
+    } else {
+        Write-Host -ForegroundColor Yellow "El módulo WebAdministration no está disponible. Algunas funciones pueden no estar operativas."
+    }
 } else {
-    Write-Host -ForegroundColor Yellow "El módulo WebAdministration no está disponible. Algunas funciones pueden no estar operativas."
+    # En Windows Cliente, usar el módulo IISAdministration si está disponible
+    if (Get-Module -ListAvailable -Name IISAdministration) {
+        Import-Module IISAdministration
+    } else {
+        Write-Host -ForegroundColor Yellow "El módulo IISAdministration no está disponible. Algunas funciones pueden no estar operativas."
+    }
 }
 
 function GetEnvironmentId {
@@ -237,9 +256,7 @@ function ExistsAosServiceFolder {
 }
 
 function HasInstalledIIS {
-    # Determinar si es un sistema operativo de servidor o cliente
-    $osInfo = Get-CimInstance Win32_OperatingSystem
-    $isServerOS = $osInfo.ProductType -ne 1 # 1 = Workstation, 2 = Domain Controller, 3 = Member Server
+    $isServerOS = Get-OSInfo
 
     $iisInstalled = $false
 
@@ -270,76 +287,10 @@ function HasInstalledIIS {
         }
     }
 
-    # # Mostrar el resultado
-    # if ($iisInstalled) {
-    #     Write-Host "IIS (Web-Server role/feature) está instalado en este sistema."
-    # } else {
-    #     Write-Host "IIS (Web-Server role/feature) NO está instalado en este sistema."
-    # }
-
-    # Opcionalmente, puedes usar la variable $iisInstalled para lógica posterior
-    # if ($iisInstalled) { # Hacer algo } else { # Hacer otra cosa }
     return $iisInstalled
 }
 
-function Create-LocalConfigFileIA {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [string]$ComponentSuffix,
-
-        [Parameter(Mandatory=$false)]
-        [string]$ConfigFolder = ".\ConfigFiles",
-
-        [Parameter(Mandatory=$false)]
-        [string]$SampleFileNameBase = "SAMPLE_Config_By_Env_(DuplicateAndRename)"
-    )
-
-    $hostname = $env:COMPUTERNAME
-    $configFileBaseName = "$hostname.$ComponentSuffix"
-    $jsonFile = Join-Path -Path $ConfigFolder -ChildPath "$configFileBaseName.json"
-    $sampleFile = Join-Path -Path $ConfigFolder -ChildPath "$SampleFileNameBase.$ComponentSuffix.json"
-
-    # Ensure the configuration directory exists
-    if (-not (Test-Path -Path $ConfigFolder -PathType Container)) {
-        New-Item -Path $ConfigFolder -ItemType Directory -Force | Out-Null
-    }
-
-    # Check if the sample file exists before proceeding
-    if (-not (Test-Path -LiteralPath $sampleFile -PathType Leaf)) {
-        throw "Sample configuration file not found: $sampleFile"
-    }
-
-    # Check for existing config file and back it up
-    if (Test-Path -LiteralPath $jsonFile -PathType Leaf) {
-        $backupFilePattern = "$configFileBaseName.BK*.json"
-        $existingBackups = Get-ChildItem -Path $ConfigFolder -Filter $backupFilePattern -File -ErrorAction SilentlyContinue
-        $maxBackupNum = 0
-        if ($existingBackups) {
-             $existingBackups | ForEach-Object {
-                if ($_.Name -match '\.BK(\d+)\.json$') {
-                    $num = [int]$matches[1]
-                    if ($num -gt $maxBackupNum) {
-                        $maxBackupNum = $num
-                    }
-                }
-            }
-        }
-        $nextBackupNum = $maxBackupNum + 1
-        $jsonBackupFile = Join-Path -Path $ConfigFolder -ChildPath "$configFileBaseName.BK$nextBackupNum.json"
-        Rename-Item -LiteralPath $jsonFile -NewName $jsonBackupFile -Force
-    }
-
-    # Copy the sample file to the target file path
-    Copy-Item -LiteralPath $sampleFile -Destination $jsonFile -Force
-
-    # Return the full path to the newly created/copied config file
-    return $jsonFile
-}
-
-
-function Create-LocalConfigFile {
+function New-LocalConfigFile {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)]
