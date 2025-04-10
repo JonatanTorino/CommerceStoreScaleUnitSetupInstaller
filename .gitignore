@@ -4,7 +4,8 @@ PackageInstaller*/
 .vs/
 
 #Excepto el archivo 
-!ConfigFiles/SAMPLE_Config_By_Env_(DuplicateAndRename).json
+!ConfigFiles/SAMPLE_Config_By_Env_(DuplicateAndRename).CSU.json
+!ConfigFiles/SAMPLE_Config_By_Env_(DuplicateAndRename).HWS.json
 
 #vscode files
 .vscode/

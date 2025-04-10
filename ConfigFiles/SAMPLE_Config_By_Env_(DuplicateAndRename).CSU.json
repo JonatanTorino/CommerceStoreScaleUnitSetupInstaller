@@ -1,0 +1,17 @@
+{
+    "__Comment1_": "La siguiente data puede ser autocompletada con el script CreateLocalConfigFile.ps1",
+    "EnvironmentId": "",
+    "RetailServerURL": "",
+    "CPOSUrl": "",
+    "Thumbprint": "",
+    "__Comment2_": "La siguiente data puede ser común a todos los entornos DEVs, la data previa puede ser diferente en cada entorno",
+    "CSUSetupPath": ".\\CSU.9.52\\CommerceStoreScaleUnitSetup.exe",
+    "CSUChannelConfig": ".\\ConfigFiles\\CommerceChannelConfig.xml",
+    "CSUHttpPort": "446",
+    "TelemetryAppName": "",
+    "AppInsightsInstrumentationKey": "",
+    "RetailServerAadClientId": "",
+    "CposAadClientId": "",
+    "AsyncClientAadClientId": "",
+    "IntervalAsyncClient": "00:01:00"
+}
