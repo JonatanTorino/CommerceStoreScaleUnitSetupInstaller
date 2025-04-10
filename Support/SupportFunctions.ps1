@@ -2,7 +2,7 @@
 # Descripción: Módulo con funciones de soporte reutilizables
 
 # Definir información del módulo
-$ModuleVersion = "1.0.0"
+$ModuleVersion = "1.0.1"
 $Author = "Jonatan Torino"
 
 Import-Module WebAdministration
@@ -215,4 +215,64 @@ function GetJsonConfig {
     }
 
     return $jsonFile
+}
+
+function ExistsAosServiceFolder {
+    $exists = $false
+    $folderName = "AosService"
+
+    if (Test-Path Env:SERVICEDRIVE) {
+        $serviceDrivePath = $env:SERVICEDRIVE
+        $targetFolderPath = Join-Path -Path $serviceDrivePath -ChildPath $folderName
+        if (Test-Path -Path $targetFolderPath -PathType Container) {
+            $exists = $true
+        } 
+    }
+    return $exists
+}
+
+function HasInstalledIIS {
+    # Determinar si es un sistema operativo de servidor o cliente
+    $osInfo = Get-CimInstance Win32_OperatingSystem
+    $isServerOS = $osInfo.ProductType -ne 1 # 1 = Workstation, 2 = Domain Controller, 3 = Member Server
+
+    $iisInstalled = $false
+
+    if ($isServerOS) {
+        # En Windows Server, usar Get-WindowsFeature
+        try {
+            # El módulo ServerManager puede no estar cargado por defecto en algunas sesiones
+            Import-Module ServerManager -ErrorAction SilentlyContinue
+            $iisFeature = Get-WindowsFeature -Name Web-Server -ErrorAction SilentlyContinue
+            if ($null -ne $iisFeature -and $iisFeature.Installed) {
+                $iisInstalled = $true
+            }
+        } catch {
+            Write-Warning "No se pudo usar Get-WindowsFeature. Error: $($_.Exception.Message)"
+            # Intenta un método alternativo si Get-WindowsFeature falla (menos común)
+            # Podrías intentar Get-WindowsOptionalFeature aquí también como fallback,
+            # aunque es menos probable que funcione si Get-WindowsFeature falló.
+        }
+    } else {
+        # En Windows Cliente (10/11), usar Get-WindowsOptionalFeature
+        try {
+            $iisFeature = Get-WindowsOptionalFeature -Online -FeatureName IIS-WebServerRole -ErrorAction SilentlyContinue
+            if ($null -ne $iisFeature -and $iisFeature.State -eq [Microsoft.Dism.Commands.FeatureState]::Enabled) {
+                $iisInstalled = $true
+            }
+        } catch {
+            Write-Warning "No se pudo usar Get-WindowsOptionalFeature. Error: $($_.Exception.Message)"
+        }
+    }
+
+    # # Mostrar el resultado
+    # if ($iisInstalled) {
+    #     Write-Host "IIS (Web-Server role/feature) está instalado en este sistema."
+    # } else {
+    #     Write-Host "IIS (Web-Server role/feature) NO está instalado en este sistema."
+    # }
+
+    # Opcionalmente, puedes usar la variable $iisInstalled para lógica posterior
+    # if ($iisInstalled) { # Hacer algo } else { # Hacer otra cosa }
+    return $iisInstalled
 }

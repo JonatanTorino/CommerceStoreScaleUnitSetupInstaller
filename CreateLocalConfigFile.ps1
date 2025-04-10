@@ -4,25 +4,45 @@ PrintFileName $MyInvocation.MyCommand.Name
 # Crear archivo
 $hostname = $env:COMPUTERNAME
 $configFolder = ".\ConfigFiles"
-$jsonFile = "$configFolder\$hostname.json"
+$configFile = "$hostname.CSU"
+$jsonFile = "$configFolder\$configFile.json"
 $fileCount = (Get-ChildItem -Path $configFolder -Filter "$hostname*" -File | Measure-Object).Count
 $jsonBackupFile = ""
 if ($fileCount -gt 0) {
     $jsonBackupFile = "$hostname.BK$fileCount.json"
     Rename-Item $jsonFile -NewName $jsonBackupFile
 }
-Copy-Item "$configFolder\SAMPLE_Config_By_Env_(DuplicateAndRename).json" $jsonFile
+Copy-Item "$configFolder\SAMPLE_Config_By_Env_(DuplicateAndRename).CSU.json" $jsonFile
 
 # Cargar archivo
 $json = Get-Content $jsonFile | ConvertFrom-Json
 
-# Seteo de configuraciones
-$json.EnvironmentId = GetEnvironmentId("AOSService")
+# Seteo de configuraciones obtenidas del entorno en caso de ser una VM DEV
+if (ExistsAosServiceFolder -and HasInstalledIIS) {
+    $json.EnvironmentId = GetEnvironmentId("AOSService")
 
-$RetailServerURL = GetWebSiteUrl('RetailServer')
-$json.RetailServerURL = "$RetailServerURL/RetailServer/Commerce"
-$json.CPOSUrl = "$RetailServerURL/POS"
-$json.Thumbprint = GetWebSiteCertThumbprint("AOSService")
+    $RetailServerURL = GetWebSiteUrl('RetailServer')
+    $json.RetailServerURL = "$RetailServerURL/RetailServer/Commerce"
+    $json.CPOSUrl = "$RetailServerURL/POS"
+    $json.Thumbprint = GetWebSiteCertThumbprint("AOSService")
+} else {
+    if ($fileCount -gt 0) {
+        $jsonBackup = Get-Content "$configFolder\$jsonBackupFile" | ConvertFrom-Json
+        # Versión anterior del json
+        if ($null -ne $jsonBackup.EnvironmentId) {
+            $json.EnvironmentId = $jsonBackup.EnvironmentId
+        }
+        if ($null -ne $jsonBackup.RetailServerURL) {
+            $json.RetailServerURL = $jsonBackup.RetailServerURL
+        }
+        if ($null -ne $jsonBackup.CPOSUrl) {
+            $json.CPOSUrl = $jsonBackup.CPOSUrl
+        }
+        if ($null -ne $jsonBackup.Thumbprint) {
+            $json.Thumbprint = $jsonBackup.Thumbprint
+        }
+    }
+}
 
 # Cargar archivo backup para recuperar algunas propiedades
 if ($fileCount -gt 0) {
@@ -40,12 +60,6 @@ if ($fileCount -gt 0) {
     }
 
     #Versión nueva del json
-    if ($null -ne $jsonBackup.HWSSetupPath) {
-        $json.HWSSetupPath = $jsonBackup.HWSSetupPath
-    }
-    if ($null -ne $jsonBackup.HWSChannelConfig) {
-        $json.HWSChannelConfig = $jsonBackup.HWSChannelConfig
-    }
     if ($null -ne $jsonBackup.CSUSetupPath) {
         $json.CSUSetupPath = $jsonBackup.CSUSetupPath
     }
