@@ -10,8 +10,7 @@ Write-Host "     Setting ApplicationInsight configuration in AxDB for telemtry  
 Write-Host "========================================"
 Write-Host 
 
-$GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
-$jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
+$jsonFile = GetJsonConfig -jsonFile $jsonFile -Suffix "CSU"
 
 # Parámetros de conexión a la base de datos
 $server = $env:COMPUTERNAME

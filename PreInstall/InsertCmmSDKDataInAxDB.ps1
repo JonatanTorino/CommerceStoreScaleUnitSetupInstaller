@@ -11,8 +11,7 @@ Write-Host "     Inserting in AxDB the AadClientIds and Commerce Profile    "
 Write-Host "========================================"
 Write-Host 
 
-$GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
-$jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
+$jsonFile = GetJsonConfig -jsonFile $jsonFile -Suffix "CSU"
 
 # Parámetros de conexión a la base de datos
 $server = $env:COMPUTERNAME

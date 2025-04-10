@@ -15,7 +15,7 @@ if (!$skipCheckGitRepoUpdated) {
     .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
 
-$jsonFile = GetJsonConfig -jsonFile $jsonFile
+$jsonFile = GetJsonConfig -jsonFile $jsonFile -Suffix "HWS"
 
 if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 

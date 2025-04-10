@@ -215,30 +215,35 @@ function CreateNewCertificate {
 
 function GetJsonConfig {
     param (
-        [string]$jsonFile
+        [string]$JsonFile,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Suffix
     )
 
-    # Comprobar si el parámetro no fue pasado o el archivo no existe
-    if ([string]::IsNullOrEmpty($jsonFile) -or -not (Test-Path -Path $jsonFile -PathType Leaf)) {
-        $nombreEntorno = [System.Environment]::MachineName
-        $ConfigFiles = '.\ConfigFiles\'
-        $rutaArchivoEntorno = $ConfigFiles + $nombreEntorno + ".json"
-        $jsonFileDefault = Get-ChildItem -Path $ConfigFiles -Filter "$nombreEntorno.json" | Select-Object -ExpandProperty FullName
-        Write-Host -ForegroundColor Yellow "Script invocado sin especificar ruta de archivo de configuración JSON."
-        Write-Host -ForegroundColor Yellow "Por lo tanto se busca por defecto el siguiente archivo:"
-        Write-Host "   $rutaArchivoEntorno"
+    $ConfigPath = ".\ConfigFiles\"
+    # If no explicit file provided, look for environment-specific default
+    if ([string]::IsNullOrEmpty($JsonFile)) {
+        $environmentName = [System.Environment]::MachineName
+        $defaultConfigPath = Join-Path -Path $ConfigPath -ChildPath "$environmentName.$Suffix.json"
+        
+        Write-Host "No explicit JSON file provided. Looking for default configuration at: $defaultConfigPath"
+        
+        try {
+            if (-not (Test-Path -Path $defaultConfigPath -PathType Leaf)) {
+                throw [System.IO.FileNotFoundException] "Default configuration file not found: $defaultConfigPath"
+            }
 
-        if (($null -ne $jsonFileDefault) -and (Test-Path $jsonFileDefault -PathType Any)) {
-            Write-Host -ForegroundColor Green "ARCHIVO ENCONTRADO"
-        } else {
-            Write-Host -ForegroundColor Red "Archivo no encontrado: $rutaArchivoEntorno"
-            throw [System.IO.FileNotFoundException] "$rutaArchivoEntorno not found."
+            Write-Host "Found default configuration file: $defaultConfigPath"
+            $JsonFile = $defaultConfigPath
         }
-
-        $jsonFile = $jsonFileDefault
+        catch {
+            Write-Error "Failed to locate configuration file: $_"
+            throw
+        }
     }
 
-    return $jsonFile
+    return $JsonFile
 }
 
 function ExistsAosServiceFolder {
