@@ -304,17 +304,21 @@ function New-LocalConfigFile {
     $configFolder = ".\ConfigFiles"
     $configFile = "$hostname.$ComponentSuffix"
     $jsonFile = "$configFolder\$configFile.json"
+    $jsonBackupFile = $null
     
     # Creo una copia de backup de existir una versión actual
     $fileCount = (Get-ChildItem -Path $configFolder -Filter "$configFile*" -File | Measure-Object).Count
     if ($fileCount -gt 0) {
-        $jsonBackupFile = "$configFile.BK$fileCount.json"
+        $jsonBackupFile = "$configFolder\$configFile.BK$fileCount.json"
         Rename-Item $jsonFile -NewName $jsonBackupFile
     }
 
     # Copy the sample file to the target file path
     Copy-Item -LiteralPath "$configFolder\$sampleFileNameBase.$ComponentSuffix.json" -Destination $jsonFile -Force
 
-    # Return the full path to the newly created/copied config file
-    return $jsonFile
+    # Return both the new config file and backup file paths (if any)
+    return [PSCustomObject]@{
+        ConfigFile = $jsonFile
+        BackupFile = $jsonBackupFile
+    }
 }

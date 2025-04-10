@@ -2,7 +2,9 @@
 PrintFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo usando función reutilizable
-$jsonFile = New-LocalConfigFile -ComponentSuffix "CSU"
+$result = New-LocalConfigFile -ComponentSuffix "CSU"
+$jsonFile = $result.JsonFile
+$jsonBackupFile = $result.JsonBackupFile
 
 # Cargar archivo
 $json = Get-Content $jsonFile | ConvertFrom-Json
@@ -17,7 +19,7 @@ if (ExistsAosServiceFolder -and HasInstalledIIS) {
     $json.Thumbprint = GetWebSiteCertThumbprint("AOSService")
 } else {
     if ($fileCount -gt 0) {
-        $jsonBackup = Get-Content "$configFolder\$jsonBackupFile" | ConvertFrom-Json
+        $jsonBackup = Get-Content $jsonBackupFile | ConvertFrom-Json
         # Versión anterior del json
         if ($null -ne $jsonBackup.EnvironmentId) {
             $json.EnvironmentId = $jsonBackup.EnvironmentId

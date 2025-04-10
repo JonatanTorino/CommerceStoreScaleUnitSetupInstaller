@@ -2,7 +2,9 @@
 PrintFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo usando función reutilizable
-$jsonFile = New-LocalConfigFile -ComponentSuffix "HWS"
+$result = New-LocalConfigFile -ComponentSuffix "HWS"
+$jsonFile = $result.JsonFile
+$jsonBackupFile = $result.JsonBackupFile
 
 # Cargar archivo
 $json = Get-Content $jsonFile | ConvertFrom-Json
@@ -14,7 +16,7 @@ if (ExistsAosServiceFolder -and HasInstalledIIS) {
 
 # Cargar archivo backup para recuperar algunas propiedades
 if ($fileCount -gt 0) {
-    $jsonBackup = Get-Content "$configFolder\$jsonBackupFile" | ConvertFrom-Json
+    $jsonBackup = Get-Content $jsonBackupFile | ConvertFrom-Json
     
     # Versión anterior del json HWS
     if ($null -ne $jsonBackup.HWSIsLocalCertificate) {
