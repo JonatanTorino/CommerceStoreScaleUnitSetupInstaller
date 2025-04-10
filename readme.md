@@ -8,7 +8,8 @@ Este repositorio contiene varios scripts para la instalación inicial de un Comm
 
 Este directorio contiene archivos de configuración necesarios para la instalación.
 
-- `SAMPLE_Config_By_Env_(DuplicateAndRename).json`: Archivo de configuración de muestra que debe ser duplicado y renombrado según el entorno.
+- `SAMPLE_Config_By_Env_(DuplicateAndRename).CSU.json`: Archivo de configuración de muestra para el Commerce Scale Unit. Debe ser duplicado y renombrado según el entorno.
+- `SAMPLE_Config_By_Env_(DuplicateAndRename).HWS.json`: Archivo de configuración de muestra para el Hardware Station. Debe ser duplicado y renombrado según el entorno.
 - `CommerceChannelConfig.xml`: Archivo XML de configuración del canal de comercio.
 - `HardwareStationConfig.xml`: Archivo XML de configuración del Hardware Station.
 
@@ -32,7 +33,7 @@ Este directorio contiene scripts que se ejecutan antes de la instalación princi
 - `InsertCmmSDKDataInAxDB.ps1`: Inserta datos de configuración en AxDB.
 - `InsertCmmSDKProfileConfig.sql`: Script SQL para insertar la configuración del perfil en AxDB.
 - `ReplaceXmlAppInsightsInstrumentationKey.ps1`: Reemplaza las claves de AppInsightsInstrumentation en el archivo XML de configuración.
-- `HWSCheckConfigSetting.ps1`: Configura y valida las configuraciones del Hardware Station en el archivo XML al que hace referencia el JSON de entrada. Este archivo es el descargado desde la tienda de BackOffice.
+- `HWSCheckConfigSetting.ps1`: Configura y valida las configuraciones del Hardware Station en el archivo XML al que hace referencia el JSON de entrada.
 
 ### PostInstall
 
@@ -57,7 +58,8 @@ Este directorio contiene scripts de soporte y utilidades.
 
 ### Scripts Principales
 
-- `CreateLocalConfigFile.ps1`: Crea un archivo de configuración a partir del archivo SAMPLE.json, completando valores que pueden ser recuperados localmente del entorno. Los AppId o InstrumentationKey los copia de un archivo de configuración previo si llega a existir.
+- `CreateLocalConfigFileForCSU.ps1`: Crea un archivo de configuración para el Commerce Scale Unit a partir del archivo de muestra, completando valores que pueden ser recuperados localmente del entorno.
+- `CreateLocalConfigFileForHWS.ps1`: Crea un archivo de configuración para el Hardware Station a partir del archivo de muestra, completando valores que pueden ser recuperados localmente del entorno.
 - `InstallCSU.ps1`: Orquesta la instalación del Commerce Scale Unit.
 - `InstallHWS.ps1`: Orquesta la instalación del Hardware Station.
 - `UpdateAfterRefreshDB.ps1`: Actualiza la configuración después de refrescar la base de datos.
@@ -65,9 +67,16 @@ Este directorio contiene scripts de soporte y utilidades.
 
 ## Instrucciones de Uso
 
-1. **Preparar el archivo de configuración JSON**: Ejecute el script `CreateLocalConfigFile.ps1` para crear el archivo automáticamente (este hace backup de existir un archivo previo), o manualmente copie y renombre el archivo `SAMPLE_Config_By_Env_(DuplicateAndRename).json` en el directorio `ConfigFiles` con el nombre del entorno (Hostname). Si ya contaba con un archivo previo, pase las configuraciones faltantes desde el backup al nuevo.
-2. **Ejecutar el script de instalación**: Use `InstallCSU.ps1` para instalar el Commerce Scale Unit y `InstallHWS.ps1` para instalar el Hardware Station.
-3. **Scripts de soporte**: Utilice los scripts en el directorio `Support` para verificar dependencias y actualizar configuraciones según sea necesario.
+1. **Preparar el archivo de configuración JSON**: 
+   - Ejecute `CreateLocalConfigFileForCSU.ps1` o `CreateLocalConfigFileForHWS.ps1` para crear los archivos automáticamente (estos hacen backup de existir un archivo previo).
+   - Alternativamente, copie y renombre los archivos `SAMPLE_Config_By_Env_(DuplicateAndRename).CSU.json` o `SAMPLE_Config_By_Env_(DuplicateAndRename).HWS.json` en el directorio `ConfigFiles` con el nombre del entorno (Hostname). Si ya contaba con un archivo previo, pase las configuraciones faltantes desde el backup al nuevo.
+
+2. **Ejecutar el script de instalación**: 
+   - Use `InstallCSU.ps1` para instalar el Commerce Scale Unit.
+   - Use `InstallHWS.ps1` para instalar el Hardware Station.
+
+3. **Scripts de soporte**: 
+   - Utilice los scripts en el directorio `Support` para verificar dependencias y actualizar configuraciones según sea necesario.
 
 Para más detalles sobre cada script, consulte los comentarios dentro de cada archivo.
 
