@@ -309,8 +309,9 @@ function New-LocalConfigFile {
     # Creo una copia de backup de existir una versión actual
     $fileCount = (Get-ChildItem -Path $configFolder -Filter "$configFile*" -File | Measure-Object).Count
     if ($fileCount -gt 0) {
-        $jsonBackupFile = "$configFolder\$configFile.BK$fileCount.json"
+        $jsonBackupFile = "$configFile.BK$fileCount.json"
         Rename-Item $jsonFile -NewName $jsonBackupFile
+        $jsonBackupFile = "$configFolder\$jsonBackupFile"
     }
 
     # Copy the sample file to the target file path
