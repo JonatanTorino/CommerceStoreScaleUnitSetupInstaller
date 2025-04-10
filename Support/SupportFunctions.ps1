@@ -188,3 +188,31 @@ function CreateNewCertificate {
     Import-Certificate -FilePath "$env:TEMP\$friendlyName.cer" -CertStoreLocation $rootStore
     Remove-Item -Path "$env:TEMP\$friendlyName.cer" -Force
 }
+
+function GetJsonConfig {
+    param (
+        [string]$jsonFile
+    )
+
+    # Comprobar si el parámetro no fue pasado o el archivo no existe
+    if ([string]::IsNullOrEmpty($jsonFile) -or -not (Test-Path -Path $jsonFile -PathType Leaf)) {
+        $nombreEntorno = [System.Environment]::MachineName
+        $ConfigFiles = '.\ConfigFiles\'
+        $rutaArchivoEntorno = $ConfigFiles + $nombreEntorno + ".json"
+        $jsonFileDefault = Get-ChildItem -Path $ConfigFiles -Filter "$nombreEntorno.json" | Select-Object -ExpandProperty FullName
+        Write-Host -ForegroundColor Yellow "Script invocado sin especificar ruta de archivo de configuración JSON."
+        Write-Host -ForegroundColor Yellow "Por lo tanto se busca por defecto el siguiente archivo:"
+        Write-Host "   $rutaArchivoEntorno"
+
+        if (($null -ne $jsonFileDefault) -and (Test-Path $jsonFileDefault -PathType Any)) {
+            Write-Host -ForegroundColor Green "ARCHIVO ENCONTRADO"
+        } else {
+            Write-Host -ForegroundColor Red "Archivo no encontrado: $rutaArchivoEntorno"
+            throw [System.IO.FileNotFoundException] "$rutaArchivoEntorno not found."
+        }
+
+        $jsonFile = $jsonFileDefault
+    }
+
+    return $jsonFile
+}

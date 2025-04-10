@@ -25,7 +25,6 @@ if (-not (Test-Path $ChannelConfig)) {
     Pause
     
 #Inicializo las URLs de los MenuItems que se van usar.
-    . .\Support\SupportFunctions.ps1
     $url = GetAosServiceUrl
     $miRetailCDXDataStore = $url + "/?mi=RetailStoreTable&lng=en-us"
 

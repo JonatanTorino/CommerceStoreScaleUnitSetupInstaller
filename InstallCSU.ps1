@@ -15,8 +15,7 @@ if (!$skipCheckGitRepoUpdated) {
     .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
 
-$GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
-$jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
+$jsonFile = GetJsonConfig -jsonFile $jsonFile
 
 if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
@@ -37,7 +36,6 @@ if ($skipHostingBudle -eq $false) {
     .\Support\CheckAndDownload.ps1 $HostingBudle $url 
 }
 
-. .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
 
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
