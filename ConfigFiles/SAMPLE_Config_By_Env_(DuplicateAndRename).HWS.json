@@ -1,7 +1,6 @@
 {
     "HWSIsLocalCertificate": false,
-    "RetailServerURL": "",
     "HWSSetupPath": ".\\HWS.9.52\\CommerceHardwareStationSetup.exe",
     "HWSChannelConfig": ".\\ConfigFiles\\HardwareStationConfig.xml",
-    "AppInsightsInstrumentationKey": ""
+    "AppInsightsInstrumentationKey":  "8c7d9ff2-d355-42f0-a8aa-9179cb3cc2de"
 }

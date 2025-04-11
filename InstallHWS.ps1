@@ -22,28 +22,21 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 }
 
 .\PreInstall\CheckRegeditEntriesDependency.ps1
+.\PreInstall\HWSInstallDependencies.ps1
 .\PreInstall\HWSCheckConfigSetting.ps1 $jsonFile
-.\PreInstall\Enable-WCF-HTTP-Activation.ps1
 
 PrintFileName $MyInvocation.MyCommand.Name
 
-$json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+$hws = Get-HWSParameters $jsonFile
 
-$HWSSetupPath = $json.HWSSetupPath
-if (Test-Path -Path $HWSSetupPath -PathType Leaf) {
+if (Test-Path -Path $hws.SetupPath -PathType Leaf) {
     # Quitar la marca "unblock" del archivo descargado
-    Unblock-File -Path $HWSSetupPath
-    $config = $json.HWSChannelConfig
-    $RetailServerURL = $json.RetailServerURL
-    
-    [xml]$HwsConfigXml = Get-Content $config
-    $xPathHardwareStationHttpsPort = "/configuration/appSettings/add[@key='HardwareStationHttpsPort']/@value"
-    $HWSPort = (Select-Xml -Xml $HwsConfigXml -XPath $xPathHardwareStationHttpsPort).Node.Value
+    Unblock-File -Path $hws.SetupPath
 
     # Construye el comando usando las variables
-    $command = "$HWSSetupPath install --Config `"$config`""`
-                + " --csuurl `"$RetailServerURL`"" `
-                + "--port $HWSPort"`
+    $command = "$($hws.SetupPath) install --Config `"$($hws.Config)`""`
+                + " --csuurl `"$($hws.RetailServerURL)`"" `
+                + "--port $($hws.HttpPort)"`
     # Ej de como usar condicionales para concatenar parámetros
         # + $(if ($skipOPOSCheck) { " --skipOPOSCheck"} )`
 
@@ -61,6 +54,6 @@ if (Test-Path -Path $HWSSetupPath -PathType Leaf) {
 }
 else {
     Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
-    Write-Host -ForegroundColor Red "   $HWSSetupPath"
+    Write-Host -ForegroundColor Red "   $($csu.SetupPath)"
     Write-Host -ForegroundColor Red "Revisar la configuración del json.HWSSetupPath que tenga la ruta completa al instalador"
 }

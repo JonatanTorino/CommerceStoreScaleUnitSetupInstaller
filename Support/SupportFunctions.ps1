@@ -328,3 +328,51 @@ function New-LocalConfigFile {
         BackupFile = $jsonBackupFile
     }
 }
+
+function Get-CSUParameters{
+    param (
+        [string]$jsonFile
+    )
+
+    # Cargar el archivo JSON
+    $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+
+    return [PSCustomObject]@{
+        SetupPath = $json.CSUSetupPath
+        ChannelConfig = $json.CSUChannelConfig
+        HttpPort = $json.CSUHttpPort
+        RetailServerURL = $json.RetailServerURL
+        Thumbprint = $json.Thumbprint
+        RetailServerAadClientId = $json.RetailServerAadClientId
+        CposAadClientId = $json.CposAadClientId
+        AsyncClientAadClientId = $json.AsyncClientAadClientId
+        IntervalAsyncClient = $json.IntervalAsyncClient
+    }
+}
+
+function Get-HWSParameters{
+    param (
+        [string]$jsonFile
+    )
+
+    # Cargar el archivo JSON
+    $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+
+    # Obtener los parámetros de configuración
+    $setupPath = $json.HWSSetupPath
+    $configXml = $json.HWSChannelConfig
+
+    [xml]$HwsConfigXml = Get-Content $configXml
+    $xPathHardwareStationHttpsPort = "/configuration/appSettings/add[@key='HardwareStationHttpsPort']/@value"
+    $httpPort = (Select-Xml -Xml $HwsConfigXml -XPath $xPathHardwareStationHttpsPort).Node.Value
+
+    $xPathHardwareStationRefRetailServerUrl = "/configuration/appSettings/add[@key='HardwareStationRefRetailServerUrl']/@value"
+    $RetailServerURL = (Select-Xml -Xml $HwsConfigXml -XPath $xPathHardwareStationRefRetailServerUrl).Node.Value
+
+    return [PSCustomObject]@{
+        SetupPath = $setupPath
+        Config = $configXml
+        HttpPort = $httpPort
+        RetailServerURL = $RetailServerURL
+    }
+}

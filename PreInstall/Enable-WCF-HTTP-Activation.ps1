@@ -1,3 +1,7 @@
+
+. .\Support\SupportFunctions.ps1
+PrintFileName $MyInvocation.MyCommand.Name
+
 # El nombre de la característica para la Activación HTTP de WCF bajo .NET Framework 4.5+ suele ser este.
 $featureName = "WCF-HTTP-Activation" 
 
