@@ -57,6 +57,30 @@ function Test-RegistryValue {
 #--------------------------------------#
 $Type = "DWORD" #Para todos igual
 
+$RegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Client'
+$Name = 'Enabled'
+$Value = '0'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+#--------------------------------------#
+
+$RegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.0\Server'
+$Name = 'Enabled'
+$Value = '0'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+#--------------------------------------#
+
+$RegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Client'
+$Name = 'Enabled'
+$Value = '0'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+#--------------------------------------#
+
+$RegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.1\Server'
+$Name = 'Enabled'
+$Value = '0'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+#--------------------------------------#
+
 $RegistryPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\TLS 1.2\Client'
 $Name = 'Enabled'
 $Value = '1'
@@ -81,6 +105,26 @@ WriteRegEditKeyValue $RegistryPath $Name $Value $Type
 
 #Se crean dos entradas en la misma ruta
 $RegistryPath = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\.NETFramework\v2.0.50727'
+$Name = 'SystemDefaultTlsVersions'
+$Value = '1'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+
+$Name = 'SchUseStrongCrypto'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+#--------------------------------------#
+
+#Se crean dos entradas en la misma ruta
+$RegistryPath = 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319'
+$Name = 'SystemDefaultTlsVersions'
+$Value = '1'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+
+$Name = 'SchUseStrongCrypto'
+WriteRegEditKeyValue $RegistryPath $Name $Value $Type
+#--------------------------------------#
+
+#Se crean dos entradas en la misma ruta
+$RegistryPath = 'HKLM:SOFTWARE\WOW6432Node\Microsoft\.NETFramework\v4.0.30319'
 $Name = 'SystemDefaultTlsVersions'
 $Value = '1'
 WriteRegEditKeyValue $RegistryPath $Name $Value $Type

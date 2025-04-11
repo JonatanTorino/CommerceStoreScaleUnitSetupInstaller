@@ -23,6 +23,7 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 
 .\PreInstall\CheckRegeditEntriesDependency.ps1
 .\PreInstall\HWSCheckConfigSetting.ps1 $jsonFile
+.\PreInstall\Enable-WCF-HTTP-Activation.ps1
 
 PrintFileName $MyInvocation.MyCommand.Name
 
