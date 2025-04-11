@@ -5,6 +5,13 @@ param (
 . .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
 
+# Verificar si Git está disponible
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host -ForegroundColor Yellow "Error: Git no está instalado o no se encuentra en el PATH del sistema. Imposible comprobar el estado del repositorio local contra el remoto."
+    Write-Host
+    return
+}
+
 # Nombre de la rama que deseas verificar (por ejemplo, "main" o "master")
 $nombreRama = "main"
 
