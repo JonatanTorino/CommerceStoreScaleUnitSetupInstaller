@@ -11,7 +11,8 @@ param (
         , HelpMessage = "URL para descargar el componente ")
     ]
     [string]
-    [ValidateNotNullOrEmpty()]$downloadURL
+    [ValidateNotNullOrEmpty()]$downloadURL,
+    [switch]$silenceMode = $false
 ) 
 
 $currentFileName = (Get-Item $PSCommandPath).Name
@@ -25,9 +26,16 @@ Write-Host "Este proceso de busqueda puede tardar varios minutos, " -ForegroundC
 Write-Host "si ya posee instalado '$searchTerm' puede saltear este proceso" -ForegroundColor Green
 $continuar = $false
 $preguntar = $true
+
+if ($silenceMode) {
+    $preguntar = $false
+    $continuar = $true
+}
+
 while ($preguntar) {
     $respuesta = Read-Host -Prompt "¿Desea continuar con la búsqueda? [Y|N]"
-    if ($respuesta -eq "Y" -or $respuesta -eq "N") {
+    if ($respuesta -eq "Y" -or $respuesta -eq "N")
+    {
         $preguntar = $false
         $continuar = $respuesta -eq "Y"
     }
@@ -52,21 +60,24 @@ if ($continuar) {
         Invoke-WebRequest -Uri $downloadURL -OutFile $downloadPath
 
         $fileNameExt = Get-ChildItem $downloadPath | Select-Object Extension 
+
         switch ($fileNameExt.Extension) {
             ".msi" { 
                 Write-Host -ForegroundColor yellow "`nInstallando '$searchTerm' en modo silencioso"
-                Start-Process -Wait -FilePath "$env:temp\$downloadFileName" -ArgumentList "/quiet /norestart"
+                Start-Process msiexec.exe -Wait -ArgumentList "/I $downloadPath /quiet"
             }
             ".exe" { 
-                Write-Host -ForegroundColor yellow "`nInstallando '$searchTerm' en modo silencioso"
-                Start-Process -Wait -FilePath "$env:temp\$downloadFileName" -ArgumentList "/quiet /norestart"
+                Write-Host -ForegroundColor yellow "`nSe ejecutará '$searchTerm', por favor siga los pasos de la ventana del instalador..."
+                $Path = "$env:temp\$downloadFileName"
+                Write-Host -ForegroundColor yellow $Path
+                Start-Process -FilePath $Path -ArgumentList '/quiet /norestart' -NoNewWindow -Wait -PassThru
             }
             Default {
-                Write-Host -ForegroundColor yellow "`nSe ejecutará '$searchTerm', por favor siga los pasos de la ventana del instalador..."
+                Write-Host -ForegroundColor yellow "`nSe ejecutará '$searchTerm', por favor siga los pasos de la ventana del instalador..."																																		
                 Start-Process "$env:temp\$downloadFileName" -Wait
             }
         }
-
+        Write-Host 
         Write-Host -ForegroundColor Green "'$searchTerm' instalado"
     }
     else {
