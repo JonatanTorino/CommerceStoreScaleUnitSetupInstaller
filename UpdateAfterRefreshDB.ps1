@@ -1,3 +1,5 @@
+#Requires -RunAsAdministrator
+
 [CmdletBinding()]
 param (
     [string]$jsonFile
@@ -5,16 +7,18 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
+. .\Support\SupportFunctions.ps1
+
 if (!$skipCheckGitRepoUpdated) {
     .\Support\CheckGitRepoUpdated.ps1 . # el . representa el directorio actual
 }
 
-$GetJsonConfigFile = ".\Support\GetJsonConfigFile.ps1"
-$jsonFile = & $GetJsonConfigFile -JsonFile $jsonFile
+$jsonFile = GetJsonConfig -jsonFile $jsonFile -Suffix "CSU"
 
 if ([string]::IsNullOrEmpty($jsonFile)) {
     throw [System.ArgumentNullException] "jsonFile" 
 }
 
-.\PreInstall\InsertCmmSDKDataInAxDB.ps1 $jsonFile
+.\PreInstall\CSUCheckJsonFile.ps1 $jsonFile
 .\PreInstall\InsertApplicationInsightConfigInAxDB.ps1 $jsonFile
+.\PreInstall\InsertCmmSDKDataInAxDB.ps1 $jsonFile
