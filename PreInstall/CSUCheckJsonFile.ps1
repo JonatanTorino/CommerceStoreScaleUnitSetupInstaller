@@ -15,7 +15,7 @@ if (-not (Test-Path $jsonFile)) {
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
 #Inicializo cada variable del json
-$ChannelConfig = $json.CSUChannelConfig
+$ChannelConfig = $json.ChannelConfig
 
 #Comprobamos existencia del xml del ChannelConfig obtenido de D365FO
 if (-not (Test-Path $ChannelConfig)) {
