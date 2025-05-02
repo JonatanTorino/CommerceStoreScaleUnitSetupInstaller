@@ -33,4 +33,4 @@ $nodo.SetAttribute("value", $EnvironmentId)  # Reemplaza "NuevoValor" con el val
 # Guardar los cambios en el archivo
 $xml.Save($ChannelConfig)
 
-Write-Host "Los atributos 'value' se han editado en el archivo XML."
+Write-Host "Los atributos 'value' se han editado en el archivo XML $ChannelConfig."

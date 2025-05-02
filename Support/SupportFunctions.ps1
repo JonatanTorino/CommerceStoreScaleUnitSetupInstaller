@@ -349,6 +349,7 @@ function Get-CSUParameters{
         AsyncClientAadClientId = $json.AsyncClientAadClientId
         IntervalAsyncClient = $json.IntervalAsyncClient
         EnvironmentId = $json.EnvironmentId
+        AppInsightsInstrumentationKey = $json.AppInsightsInstrumentationKey
     }
 }
 
