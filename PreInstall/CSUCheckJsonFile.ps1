@@ -12,10 +12,10 @@ if (-not (Test-Path $jsonFile)) {
 }
 
 #Parseo el archivo json para leer sus propiedades
-$json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+$csu = . Get-CSUParameters $jsonFile 
 
 #Inicializo cada variable del json
-$ChannelConfig = $json.ChannelConfig
+$ChannelConfig = $csu.ChannelConfig
 
 #Comprobamos existencia del xml del ChannelConfig obtenido de D365FO
 if (-not (Test-Path $ChannelConfig)) {
@@ -51,13 +51,13 @@ if ($null -eq $AsyncClientAppInsightsInstrumentationKey.Node.Value -Or
 
 $xPathEnvironmentId  = "/configuration/appSettings/add[@key='EnvironmentId']/@value"
 $EnvironmentId = Select-Xml -Xml $ChannelConfigXml -XPath $xPathEnvironmentId
-$EnvironmentIdjson = $json.EnvironmentId -replace '"', ''
+$EnvironmentIdjson = $csu.EnvironmentId -replace '"', ''
 $EnvironmentIdXml = $EnvironmentId.Node.Value
 if ($null -eq $EnvironmentId.Node.Value)
 {
     throw "El archivo $ChannelConfig tiene EnvironmentId faltante."
 }
-if ($json.EnvironmentId -ne $EnvironmentId.Node.Value)
+if ($csu.EnvironmentId -ne $EnvironmentId.Node.Value)
 {
     Write-Host "JsonFile        EnvironmentId $EnvironmentIdjson"
     Write-Host "ChannelConfig   EnvironmentId $EnvironmentIdXml"

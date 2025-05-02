@@ -40,7 +40,7 @@ if ($skipHostingBudle -eq $false) {
 
 PrintFileName $MyInvocation.MyCommand.Name
 
-$csu = Get-Content $jsonFile -Raw | ConvertFrom-Json
+$csu = . Get-CSUParameters $jsonFile 
 
 if (Test-Path -Path $csu.SetupPath -PathType Leaf) {
     # Quitar la marca "unblock" del archivo descargado

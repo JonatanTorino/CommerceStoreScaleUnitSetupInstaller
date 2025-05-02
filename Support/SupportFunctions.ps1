@@ -331,6 +331,7 @@ function New-LocalConfigFile {
 
 function Get-CSUParameters{
     param (
+        [ValidateNotNullOrEmpty()]
         [string]$jsonFile
     )
 
@@ -347,11 +348,13 @@ function Get-CSUParameters{
         CposAadClientId = $json.CposAadClientId
         AsyncClientAadClientId = $json.AsyncClientAadClientId
         IntervalAsyncClient = $json.IntervalAsyncClient
+        EnvironmentId = $json.EnvironmentId
     }
 }
 
 function Get-HWSParameters{
     param (
+        [ValidateNotNullOrEmpty()]
         [string]$jsonFile
     )
 

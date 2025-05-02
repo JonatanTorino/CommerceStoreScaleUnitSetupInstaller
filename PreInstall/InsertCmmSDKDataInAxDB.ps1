@@ -17,8 +17,8 @@ $jsonFile = GetJsonConfig -jsonFile $jsonFile -Suffix "CSU"
 $server = $env:COMPUTERNAME
 
 #Parseo el archivo json para leer sus propiedades
-$json = Get-Content $jsonFile -Raw | ConvertFrom-Json
-$channelConfig=$json.ChannelConfig
+$csu = . Get-CSUParameters $jsonFile 
+$channelConfig = $csu.ChannelConfig
 
 #Obtento el TenantId del archivo ChannelConfig referenciado en el json de configuración
 [xml]$channelConfigXml = Get-Content $channelConfig
@@ -28,11 +28,11 @@ $TenantId = Select-Xml -Xml $channelConfigXml -XPath $xPathTenantId
 $StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathStoreSystemChannelDatabaseId
 
 #Inicializo cada variable del json
-[string]$RetailServerAadClientId=$json.RetailServerAadClientId
-[string]$CposAadClientId=$json.CposAadClientId
-[string]$AsyncClientAadClientId=$json.AsyncClientAadClientId
-[string]$RetailServerURL='"'+$json.RetailServerURL+'"'
-[string]$CPOSURL='"'+$json.CPOSUrl+'"'
+[string]$RetailServerAadClientId = $csu.RetailServerAadClientId
+[string]$CposAadClientId = $csu.CposAadClientId
+[string]$AsyncClientAadClientId = $csu.AsyncClientAadClientId
+[string]$RetailServerURL = '"' + $csu.RetailServerURL + '"'
+[string]$CPOSURL = '"' + $csu.CPOSUrl + '"'
 
 # Ruta del archivo SQL
 $rutaScriptSQL = '.\PreInstall\InsertCmmSDKAzureActiveClientId.sql'

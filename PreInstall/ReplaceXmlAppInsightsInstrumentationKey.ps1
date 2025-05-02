@@ -8,12 +8,12 @@ param (
 PrintFileName $MyInvocation.MyCommand.Name
 
 #Parseo el archivo json para leer sus propiedades
-$json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+$csu = . Get-CSUParameters $jsonFile 
 
 #Inicializo cada variable del json
-[string]$AppInsightsInstrumentationKey=$json.AppInsightsInstrumentationKey
-[string]$ChannelConfig = $json.ChannelConfig
-[string]$EnvironmentId = $json.EnvironmentId
+[string]$AppInsightsInstrumentationKey = $csu.AppInsightsInstrumentationKey
+[string]$ChannelConfig = $csu.ChannelConfig
+[string]$EnvironmentId = $csu.EnvironmentId
 
 # Cargar el archivo XML
 [xml]$xml = Get-Content $ChannelConfig

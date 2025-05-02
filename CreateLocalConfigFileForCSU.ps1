@@ -45,7 +45,7 @@ if ($null -ne $jsonBackupFile) {
         $json.CSUSetupPath = $jsonBackup.ScaleUnitSetupPath
     }
     if ($null -ne $jsonBackup.ChannelConfig) {
-        $json.ChannelConfig = $jsonBackup.ChannelConfig
+        $json.CSUChannelConfig = $jsonBackup.ChannelConfig
     }
     if ($null -ne $jsonBackup.HttpPort) {
         $json.CSUHttpPort = $jsonBackup.HttpPort
@@ -56,7 +56,7 @@ if ($null -ne $jsonBackupFile) {
         $json.CSUSetupPath = $jsonBackup.CSUSetupPath
     }
     if ($null -ne $jsonBackup.CSUChannelConfig) {
-        $json.ChannelConfig = $jsonBackup.CSUChannelConfig
+        $json.CSUChannelConfig = $jsonBackup.CSUChannelConfig
     }
     if ($null -ne $jsonBackup.CSUHttpPort) {
         $json.CSUHttpPort = $jsonBackup.CSUHttpPort
