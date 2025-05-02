@@ -18,7 +18,7 @@ $server = $env:COMPUTERNAME
 
 #Parseo el archivo json para leer sus propiedades
 $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
-$channelConfig=$json.CSUChannelConfig
+$channelConfig=$json.ChannelConfig
 
 #Obtento el TenantId del archivo ChannelConfig referenciado en el json de configuración
 [xml]$channelConfigXml = Get-Content $channelConfig

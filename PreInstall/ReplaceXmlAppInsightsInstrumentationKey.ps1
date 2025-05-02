@@ -12,7 +12,7 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 
 #Inicializo cada variable del json
 [string]$AppInsightsInstrumentationKey=$json.AppInsightsInstrumentationKey
-[string]$ChannelConfig = $json.CSUChannelConfig
+[string]$ChannelConfig = $json.ChannelConfig
 [string]$EnvironmentId = $json.EnvironmentId
 
 # Cargar el archivo XML
