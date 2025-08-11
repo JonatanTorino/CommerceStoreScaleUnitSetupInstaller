@@ -58,15 +58,22 @@ if (Test-Path $pkgsPath) {
     Write-Host "No se encontró la carpeta pkgsIP en $pkgsPath"
 }
 
+# ...existing code...
+
 # Crear nombre de zip con fecha y hora actual
 $now = Get-Date
 $fecha = $now.ToString("yyyyMMdd")
 $hora = $now.ToString("HH.mmtt")
 $zipName = "AIOPCSU_{0}_{1}.zip" -f $fecha, $hora
-$desktopPath = [Environment]::GetFolderPath("Desktop")
-$finalZipPath = Join-Path $desktopPath $zipName
 
-# Comprimir carpeta temporal en Desktop
+# Nueva ruta de destino
+$paquetesPath = "K:\Axxon\PaquetesCSU"
+if (-not (Test-Path $paquetesPath)) {
+    New-Item -Path $paquetesPath -ItemType Directory -Force | Out-Null
+}
+$finalZipPath = Join-Path $paquetesPath $zipName
+
+# Comprimir carpeta temporal en la nueva ruta
 Compress-Archive -Path "$tempFolder\*" -DestinationPath $finalZipPath
 
 Write-Host "Archivo zip creado en: $finalZipPath"
