@@ -60,7 +60,7 @@ if (Test-Path $pkgsPath) {
 
 # Crear nombre de zip con fecha y hora actual
 $now = Get-Date
-$fecha = $now.ToString("ddMMyyyy")
+$fecha = $now.ToString("yyyyMMdd")
 $hora = $now.ToString("HH.mmtt")
 $zipName = "AIOPCSU_{0}_{1}.zip" -f $fecha, $hora
 $desktopPath = [Environment]::GetFolderPath("Desktop")
