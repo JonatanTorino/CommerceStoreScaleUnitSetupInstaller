@@ -8,6 +8,15 @@ if (-not $AIOPPATH) {
     $AIOPPATH = Read-Host "Ingrese carpeta AIOP o el archivo zip"
 }
 
+# Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
+$installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
+$installerRepoRoot = Split-Path -Parent $installerRepo
+Write-Host "Actualizando $installerRepoRoot ..."
+Push-Location $installerRepoRoot
+git fetch
+git pull
+Pop-Location
+
 # Solicitar PKGSPATH si no se asignó
 if (-not $PKGSPATH) {
     $PKGSPATH = Read-Host "Ingrese la ruta de destino para los archivos .nupkg (o presione ENTER para omitir este paso)"

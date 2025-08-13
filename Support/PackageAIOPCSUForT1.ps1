@@ -6,6 +6,15 @@ if (-not $RepoName) {
     $RepoName = Read-Host "Ingrese el nombre del repositorio"
 }
 
+# Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
+$installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
+$installerRepoRoot = Split-Path -Parent $installerRepo
+Write-Host "Actualizando $installerRepoRoot ..."
+Push-Location $installerRepoRoot
+git fetch
+git pull
+Pop-Location
+
 # Hacer git pull en K:\Repos\IPRetailV2 sobre la rama dev
 $repo1 = "K:\Repos\IPRetailV2"
 Write-Host "Actualizando $repo1 ..."
