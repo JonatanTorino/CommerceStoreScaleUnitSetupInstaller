@@ -6,6 +6,15 @@ if (-not $RepoName) {
     $RepoName = Read-Host "Ingrese el nombre del repositorio"
 }
 
+# Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
+$installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
+$installerRepoRoot = Split-Path -Parent $installerRepo
+Write-Host "Actualizando $installerRepoRoot ..."
+Push-Location $installerRepoRoot
+git fetch
+git pull
+Pop-Location
+
 # Hacer git pull en K:\Repos\IPRetailV2 sobre la rama dev
 $repo1 = "K:\Repos\IPRetailV2"
 Write-Host "Actualizando $repo1 ..."
@@ -31,22 +40,24 @@ $msbuildExe = "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuil
 $msbuildPath1 = "K:\Repos\IPRetailV2\CmmSDK\src"
 Write-Host "Ejecutando msbuild en $msbuildPath1 ..."
 Push-Location $msbuildPath1
-$proc1 = Start-Process -FilePath $msbuildExe -NoNewWindow -Wait -PassThru
+& $msbuildExe
+$exitCode1 = $LASTEXITCODE
 Pop-Location
-if ($proc1.ExitCode -ne 0) {
-    Write-Host "Error en msbuild en $msbuildPath1. Código de salida: $($proc1.ExitCode)"
-    exit $proc1.ExitCode
+if ($exitCode1 -ne 0) {
+    Write-Host "Error en msbuild en $msbuildPath1. Código de salida: $exitCode1"
+    exit $exitCode1
 }
 
 # Ejecutar msbuild en K:\Repos\CarlosIsla\CmmSDK\src
 $msbuildPath2 = "K:\Repos\CarlosIsla\CmmSDK\src"
 Write-Host "Ejecutando msbuild en $msbuildPath2 ..."
 Push-Location $msbuildPath2
-$proc2 = Start-Process -FilePath $msbuildExe -NoNewWindow -Wait -PassThru
+& $msbuildExe
+$exitCode2 = $LASTEXITCODE
 Pop-Location
-if ($proc2.ExitCode -ne 0) {
-    Write-Host "Error en msbuild en $msbuildPath2. Código de salida: $($proc2.ExitCode)"
-    exit $proc2.ExitCode
+if ($exitCode2 -ne 0) {
+    Write-Host "Error en msbuild en $msbuildPath2. Código de salida: $exitCode2"
+    exit $exitCode2
 }
 
 
