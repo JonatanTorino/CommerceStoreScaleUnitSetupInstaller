@@ -1,3 +1,12 @@
+# Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
+$installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
+$installerRepoRoot = Split-Path -Parent $installerRepo
+Write-Host "Actualizando $installerRepoRoot ..."
+Push-Location $installerRepoRoot
+git fetch
+git pull
+Pop-Location
+
 param (
     [string]$AIOPPATH,
     [string]$PKGSPATH
