@@ -1,17 +1,12 @@
 param (
     [Parameter(Mandatory=$true)]
     [string]$AIOPPATH,
-
-    [Parameter(Mandatory=$false)]
-    [string]$PKGSPATH = $null
+    
+    [Parameter(Mandatory=$true)]
+    [string]$PKGSPATH
 )
 
-# --- Convertir string vacío a null ---
-if ($PKGSPATH -eq "") {
-    $PKGSPATH = $null
-}
-
-# --- Actualizar el propio repositorio ---
+# Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
 $installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
 $installerRepoRoot = Split-Path -Parent $installerRepo
 Write-Host "Actualizando $installerRepoRoot ..."
@@ -20,7 +15,6 @@ git fetch
 git pull
 Pop-Location
 
-# --- Función de parada de AppPools ---
 function Stop-WebAppPoolForce {
     param(
         [Parameter(Mandatory=$true)]
@@ -36,32 +30,29 @@ function Stop-WebAppPoolForce {
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
-# --- Validar AIOPPATH ---
-if (-not (Test-Path $AIOPPATH)) {
-    Write-Host -ForegroundColor Red "Path $AIOPPATH no existe. Verificar pipeline."
-    exit 1
-}
-
-# --- Si es zip, extraer a temporal ---
+# Si la ruta es un zip, extraer a temporal
 $tempFolder = $null
-if ($AIOPPATH.ToLower().EndsWith(".zip")) {
+if ($AIOPPATH.ToLower().EndsWith(".zip") -and (Test-Path $AIOPPATH)) {
     $tempFolder = Join-Path $env:TEMP ("AIOP_" + [guid]::NewGuid().ToString())
     Expand-Archive -Path $AIOPPATH -DestinationPath $tempFolder -Force
     $AIOPBase = $tempFolder
-} else {
+} elseif (Test-Path $AIOPPATH) {
     $AIOPBase = $AIOPPATH
+} else {
+    Write-Host -ForegroundColor Red "Path is invalid"
+    exit
 }
 
 $InstallersFoldersPath = Join-Path $AIOPBase "ExtensionsPackageInstallers"
 $ExtFolder = Join-Path $AIOPBase "ext"
 
-# --- Detener AppPools ---
 Stop-WebAppPoolForce -Name RssuCore
 Stop-WebAppPoolForce -Name RetailServer
 
-# --- Ejecutar instaladores ---
+# Listas para almacenar los resultados
 $archivosTerminadosCorrectamente = @()
 $archivosTerminadosConError = @()
+
 $InstallOrUninstall = "install"
 
 if (Test-Path $InstallersFoldersPath) {
@@ -86,36 +77,46 @@ if (Test-Path $InstallersFoldersPath) {
     Write-Host "No se encontró la carpeta ExtensionsPackageInstallers en $InstallersFoldersPath"
 }
 
-# --- Informe final ---
+# Mostrar el informe final
 Write-Host
-Write-Host "Archivos que terminaron correctamente:"
+Write-Host
+Write-Host "Informes de finalización:"
+Write-Host -ForegroundColor Green "Archivos que terminaron correctamente:"
 $archivosTerminadosCorrectamente
 Write-Host
-Write-Host "Archivos que terminaron con error:"
+Write-Host
+Write-Host -ForegroundColor Red "Archivos que terminaron con error:"
 $archivosTerminadosConError
 
-# --- Iniciar AppPools ---
+Write-Host
+Write-Host
 Start-WebAppPool -Name RssuCore
+Write-Host
+Write-Host
 
-# --- Copiar carpeta 'ext' ---
 $destinationPath = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Extensions\ext"
 if (Test-Path $destinationPath) {
     Remove-Item -Path $destinationPath -Recurse -Force
     Write-Host "Existing 'ext' folder deleted."
+} else {
+    Write-Host "No existing 'ext' folder found."
 }
 
 if (Test-Path $ExtFolder) {
     Copy-Item -Path $ExtFolder -Destination $destinationPath -Recurse
-    Write-Host "New 'ext' folder copiada desde '$ExtFolder' a '$destinationPath'."
+    Write-Host "New 'ext' folder copied from '$ExtFolder' to '$destinationPath'."
 
     $oldConfig = Join-Path $destinationPath "CommerceRuntime.ext.config"
     if (Test-Path $oldConfig) {
         Rename-Item -Path $oldConfig -NewName "Extension.config" -Force
         Write-Host "Archivo 'CommerceRuntime.ext.config' renombrado a 'Extension.config'."
+    } else {
+        Write-Host "El archivo 'CommerceRuntime.ext.config' no se encontró para renombrar."
     }
+} else {
+    Write-Host "Source path '$ExtFolder' does not exist. Please check the path."
 }
 
-# --- Limpiar otras carpetas ---
 $parentPath = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Extensions"
 Get-ChildItem -Path $parentPath -Directory | Where-Object { $_.Name -ne "ext" } | ForEach-Object {
     Remove-Item -Path $_.FullName -Recurse -Force
@@ -124,10 +125,11 @@ Get-ChildItem -Path $parentPath -Directory | Where-Object { $_.Name -ne "ext" } 
 Write-Host "Proceso completado. Solo la carpeta 'ext' permanece."
 
 # --- BLOQUE OPCIONAL PARA COPIAR LA CARPETA pkgsIP ---
-if ($PKGSPATH) {
+if ($PKGSPATH -and $PKGSPATH.Trim() -ne "") {
     $PkgsSource = Join-Path $AIOPBase "pkgsIP"
     $PkgsDest = Join-Path $PKGSPATH "pkgsIP"
     if (Test-Path $PkgsSource) {
+        # Si ya existe la carpeta pkgsIP en destino, eliminarla
         if (Test-Path $PkgsDest) {
             Remove-Item -Path $PkgsDest -Recurse -Force
             Write-Host "Carpeta existente 'pkgsIP' eliminada en '$PKGSPATH'."
@@ -141,12 +143,12 @@ if ($PKGSPATH) {
     Write-Host "No se especificó ruta de destino para los paquetes .nupkg. Este paso se omite."
 }
 
-# --- Limpiar temporal ---
+# Limpiar temporal si se extrajo zip
 if ($tempFolder) {
     Remove-Item -Path $tempFolder -Recurse -Force
 }
 
-# --- Tiempo total ---
 $elapsedSecods = $stopwatch.Elapsed
-Write-Host -ForegroundColor Green "Total elapsed time: $elapsedSecods"
+Write-Host -ForegroundColor Green 'Total elapsed time: '
+$elapsedSecods
 $stopwatch.Stop()
