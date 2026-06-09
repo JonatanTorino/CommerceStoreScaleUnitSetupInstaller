@@ -7,7 +7,7 @@ $jsonFile = $result.ConfigFile
 $jsonBackupFile = $result.BackupFile
 
 # Cargar archivo
-$json = Get-Content $jsonFile | ConvertFrom-Json
+$json = Get-Content -Raw -Encoding utf8 $jsonFile | ConvertFrom-Json
 
 # Seteo de configuraciones obtenidas del entorno en caso de ser una VM DEV
 if (ExistsAosServiceFolder -and HasInstalledIIS) {
@@ -19,7 +19,7 @@ if (ExistsAosServiceFolder -and HasInstalledIIS) {
     $json.Thumbprint = GetWebSiteCertThumbprint("AOSService")
 } else {
     if ($null -ne $jsonBackupFile) {
-        $jsonBackup = Get-Content $jsonBackupFile | ConvertFrom-Json
+        $jsonBackup = Get-Content -Raw -Encoding utf8 $jsonBackupFile | ConvertFrom-Json
         # Versión anterior del json
         if ($null -ne $jsonBackup.EnvironmentId) {
             $json.EnvironmentId = $jsonBackup.EnvironmentId
@@ -38,7 +38,7 @@ if (ExistsAosServiceFolder -and HasInstalledIIS) {
 
 # Cargar archivo backup para recuperar algunas propiedades
 if ($null -ne $jsonBackupFile) {
-    $jsonBackup = Get-Content $jsonBackupFile | ConvertFrom-Json
+    $jsonBackup = Get-Content -Raw -Encoding utf8 $jsonBackupFile | ConvertFrom-Json
     
     # Versión anterior del json
     if ($null -ne $jsonBackup.ScaleUnitSetupPath) {
@@ -62,13 +62,13 @@ if ($null -ne $jsonBackupFile) {
         $json.CSUHttpPort = $jsonBackup.CSUHttpPort
     }
     
-    $json.TelemetryAppName = $jsonBackup.TelemetryAppName
-    $json.AppInsightsInstrumentationKey = $jsonBackup.AppInsightsInstrumentationKey
-    $json.RetailServerAadClientId = $jsonBackup.RetailServerAadClientId
-    $json.CposAadClientId = $jsonBackup.CposAadClientId
-    $json.AsyncClientAadClientId = $jsonBackup.AsyncClientAadClientId
-    $json.IntervalAsyncClient = $jsonBackup.IntervalAsyncClient
+        $json.TelemetryAppName = $jsonBackup.TelemetryAppName
+        $json.AppInsightsInstrumentationKey = $jsonBackup.AppInsightsInstrumentationKey
+        $json.RetailServerAadClientId = $jsonBackup.RetailServerAadClientId
+        $json.CposAadClientId = $jsonBackup.CposAadClientId
+        $json.AsyncClientAadClientId = $jsonBackup.AsyncClientAadClientId
+        $json.IntervalAsyncClient = $jsonBackup.IntervalAsyncClient
 }
 
 # Guardado del archivo
-$json | ConvertTo-Json | Out-File $jsonFile
+$json | ConvertTo-Json | Out-File -Encoding utf8 $jsonFile

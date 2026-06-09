@@ -17,15 +17,29 @@ $isServerOS = Get-OSInfo
 
 if ($isServerOS) {
     # En Windows Server, usar el módulo WebAdministration
-    if (Get-Module -ListAvailable -Name WebAdministration) {
-        Import-Module WebAdministration
+    $hasWebAdmin = $null
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $hasWebAdmin = Get-Module -ListAvailable -Name WebAdministration -SkipEditionCheck
+    } else {
+        $hasWebAdmin = Get-Module -ListAvailable -Name WebAdministration
+    }
+
+    if ($hasWebAdmin) {
+        Import-Module WebAdministration -WarningAction SilentlyContinue
     } else {
         Write-Host -ForegroundColor Yellow "El módulo WebAdministration no está disponible. Algunas funciones pueden no estar operativas."
     }
 } else {
     # En Windows Cliente, usar el módulo IISAdministration si está disponible
-    if (Get-Module -ListAvailable -Name IISAdministration) {
-        Import-Module IISAdministration
+    $hasIISAdmin = $null
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $hasIISAdmin = Get-Module -ListAvailable -Name IISAdministration -SkipEditionCheck
+    } else {
+        $hasIISAdmin = Get-Module -ListAvailable -Name IISAdministration
+    }
+
+    if ($hasIISAdmin) {
+        Import-Module IISAdministration -WarningAction SilentlyContinue
     } else {
         Write-Host -ForegroundColor Yellow "El módulo IISAdministration no está disponible. Algunas funciones pueden no estar operativas."
     }
@@ -312,11 +326,13 @@ function New-LocalConfigFile {
     $jsonBackupFile = $null
     
     # Creo una copia de backup de existir una versión actual
-    $fileCount = (Get-ChildItem -Path $configFolder -Filter "$configFile*" -File | Measure-Object).Count
-    if ($fileCount -gt 0) {
-        $jsonBackupFile = "$configFile.BK$fileCount.json"
-        Rename-Item $jsonFile -NewName $jsonBackupFile
-        $jsonBackupFile = "$configFolder\$jsonBackupFile"
+    if (Test-Path -Path $jsonFile -PathType Leaf) {
+        $fileCount = (Get-ChildItem -Path $configFolder -Filter "$configFile*" -File | Measure-Object).Count
+        if ($fileCount -gt 0) {
+            $jsonBackupFile = "$configFile.BK$fileCount.json"
+            Rename-Item $jsonFile -NewName $jsonBackupFile
+            $jsonBackupFile = "$configFolder\$jsonBackupFile"
+        }
     }
 
     # Copy the sample file to the target file path
@@ -336,7 +352,7 @@ function Get-CSUParameters{
     )
 
     # Cargar el archivo JSON
-    $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+    $json = Get-Content $jsonFile -Raw -Encoding utf8 | ConvertFrom-Json
 
     return [PSCustomObject]@{
         SetupPath = $json.CSUSetupPath
@@ -360,7 +376,7 @@ function Get-HWSParameters{
     )
 
     # Cargar el archivo JSON
-    $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+    $json = Get-Content $jsonFile -Raw -Encoding utf8 | ConvertFrom-Json
 
     # Obtener los parámetros de configuración
     $setupPath = $json.HWSSetupPath

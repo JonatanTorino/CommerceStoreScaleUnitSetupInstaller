@@ -7,11 +7,11 @@ $jsonFile = $result.ConfigFile
 $jsonBackupFile = $result.BackupFile
 
 # Cargar archivo
-$json = Get-Content $jsonFile | ConvertFrom-Json
+$json = Get-Content -Raw -Encoding utf8 $jsonFile | ConvertFrom-Json
 
 # Cargar archivo backup para recuperar algunas propiedades
 if ($null -ne $jsonBackupFile) {
-    $jsonBackup = Get-Content $jsonBackupFile | ConvertFrom-Json
+    $jsonBackup = Get-Content -Raw -Encoding utf8 $jsonBackupFile | ConvertFrom-Json
     
     # Versión anterior del json HWS
     if ($null -ne $jsonBackup.HWSIsLocalCertificate) {
@@ -30,4 +30,4 @@ if ($null -ne $jsonBackupFile) {
 }
 
 # Guardado del archivo
-$json | ConvertTo-Json | Out-File $jsonFile
+$json | ConvertTo-Json | Out-File -Encoding utf8 $jsonFile
