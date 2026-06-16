@@ -18,9 +18,9 @@ Set-Location $path
 Copy-Item "config.json" "config.json.backup"
 
 $jsonFile = "config.json"
-$json = Get-Content $jsonFile -Raw | ConvertFrom-Json
+$json = Get-Content $jsonFile -Raw -Encoding utf8 | ConvertFrom-Json
 $json.RetailServerUrl = $urlRetailServerCommerce
 
-$json | ConvertTo-Json -Compress -depth 32 | Out-File $jsonFile
+$json | ConvertTo-Json -Compress -depth 32 | Out-File -Encoding utf8 $jsonFile
 
 Set-Location $originalPath
