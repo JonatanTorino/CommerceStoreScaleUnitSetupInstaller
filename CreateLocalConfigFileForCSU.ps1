@@ -1,3 +1,10 @@
+if ($PSVersionTable.PSVersion.Major -ge 6) {
+    Write-Warning "Este script requiere Windows PowerShell 5.1 debido a la dependencia con el modulo WebAdministration de IIS."
+    Write-Warning "Re-ejecutando en Windows PowerShell 5.1..."
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath $args
+    exit $LASTEXITCODE
+}
+
 . .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
 

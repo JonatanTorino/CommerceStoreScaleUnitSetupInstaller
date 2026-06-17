@@ -9,6 +9,19 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
+if ($PSVersionTable.PSVersion.Major -ge 6) {
+    Write-Warning "Este script requiere Windows PowerShell 5.1 debido a dependencias con IIS y WebAdministration."
+    Write-Warning "Re-ejecutando en Windows PowerShell 5.1..."
+    
+    $params = @()
+    if ($jsonFile) { $params += "-jsonFile", $jsonFile }
+    if ($skipHostingBudle) { $params += "-skipHostingBudle" }
+    if ($skipCheckGitRepoUpdated) { $params += "-skipCheckGitRepoUpdated" }
+    
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath $params
+    exit $LASTEXITCODE
+}
+
 . .\Support\SupportFunctions.ps1
 
 if (!$skipCheckGitRepoUpdated) {
@@ -29,14 +42,12 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 
 if ($skipHostingBudle -eq $false) {
     #Programa y versión concreta a buscar
-    # $HostingBudle = "Microsoft ASP.NET Core 6.0.35 Hosting Bundle Options"
-    # $url = "https://download.visualstudio.microsoft.com/download/pr/59c72253-7750-4f34-8804-4fb326754c4f/b83a6a459d49b6127757b4f873ba459f/dotnet-hosting-6.0.35-win.exe"
-    # $HostingBudle = "Microsoft ASP.NET Core 8.0.11 Hosting Bundle Options"
-    # $url = "https://download.visualstudio.microsoft.com/download/pr/4956ec5e-8502-4454-8f28-40239428820f/e7181890eed8dfa11cefbf817c4e86b0/dotnet-hosting-8.0.11-win.exe"
-    # $HostingBudle = "Microsoft ASP.NET Core 8.0.15 Hosting Bundle Options"
-    # $url = "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/8.0.15/dotnet-hosting-8.0.15-win.exe"
-    # .\Support\CheckAndDownload.ps1 $HostingBudle $url 
-    winget install Microsoft.DotNet.HostingBundle.8
+    Write-Host 
+    Write-Host "========================================"
+    Write-Host "    Microsoft ASP.NET Core 8 Hosting Bundle Options"
+    Write-Host "========================================"
+    Write-Host 
+    winget install Microsoft.DotNet.HostingBundle.8 --silent
 }
 
 PrintFileName $MyInvocation.MyCommand.Name

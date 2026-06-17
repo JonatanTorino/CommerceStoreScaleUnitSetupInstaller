@@ -6,6 +6,13 @@ param (
     [ValidateNotNullOrEmpty()]$retailServerURL
 ) 
 
+if ($PSVersionTable.PSVersion.Major -ge 6) {
+    Write-Warning "El modulo WebAdministration de IIS no es compatible nativamente con PowerShell Core (7+)."
+    Write-Warning "Re-ejecutando el script en Windows PowerShell 5.1..."
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath -retailServerURL $retailServerURL
+    exit $LASTEXITCODE
+}
+
 # Importar funciones de soporte resolviendo la ruta con $PSScriptRoot
 . "$PSScriptRoot\..\Support\SupportFunctions.ps1"
 PrintFileName $MyInvocation.MyCommand.Name

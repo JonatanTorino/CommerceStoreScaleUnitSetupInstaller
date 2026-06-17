@@ -9,6 +9,19 @@ param (
     [switch]$skipCheckGitRepoUpdated = $false
 )
 
+if ($PSVersionTable.PSVersion.Major -ge 6) {
+    Write-Warning "Este script requiere Windows PowerShell 5.1 debido a dependencias con IIS y WebAdministration."
+    Write-Warning "Re-ejecutando en Windows PowerShell 5.1..."
+    
+    $params = @()
+    if ($jsonFile) { $params += "-jsonFile", $jsonFile }
+    if ($skipHostingBudle) { $params += "-skipHostingBudle" }
+    if ($skipCheckGitRepoUpdated) { $params += "-skipCheckGitRepoUpdated" }
+    
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath $params
+    exit $LASTEXITCODE
+}
+
 . .\Support\SupportFunctions.ps1
 
 if (!$skipCheckGitRepoUpdated) {
