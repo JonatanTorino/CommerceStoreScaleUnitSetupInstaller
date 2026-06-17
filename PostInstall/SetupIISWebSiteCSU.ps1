@@ -1,67 +1,106 @@
 #Requires -RunAsAdministrator
 
-param ( #Recibir valor en este formato 00:01:00
-[parameter(Mandatory = $true
-    , HelpMessage = "Ingresar URL del RetailServer")
-]
-[string]
-[ValidateNotNullOrEmpty()]$retailServerURL
+param (
+    [parameter(Mandatory = $true, HelpMessage = "Ingresar URL del RetailServer")]
+    [string]
+    [ValidateNotNullOrEmpty()]$retailServerURL
 ) 
 
-. .\Support\SupportFunctions.ps1
+# Importar funciones de soporte resolviendo la ruta con $PSScriptRoot
+. "$PSScriptRoot\..\Support\SupportFunctions.ps1"
 PrintFileName $MyInvocation.MyCommand.Name
 
-# Usa el objeto System.Uri para obtener el hostname
+# Obtener hostname y puerto
 $uri = [System.Uri]::new($retailServerURL)
-
-# Define el nombre del sitio, nuevo hostname, nuevo puerto y nombre del certificado
-$siteName = "RetailStoreScaleUnitWebSite.AspNetCore"  # Cambia este valor por el nombre de tu WebSite
+$siteName = "RetailStoreScaleUnitWebSite.AspNetCore"
 $newHostname = $uri.Host
-$newPort = 443  # Puerto HTTPS
+$newPort = 443
 
-#Cambio el puerto de WebSite RetailServer para reutilizar el 443
-# Obtiene el binding con el puerto especificado
+# Obtener el certificado más reciente que coincida con el hostname/patrón
+$certName = $newHostname -replace "ret(?=\.axcloud\.dynamics\.com)", "aos"
+$cert = Get-ChildItem -Path Cert:\LocalMachine\My | 
+    Where-Object { $_.Subject -like "*$certName*" } | 
+    Sort-Object NotAfter -Descending | 
+    Select-Object -First 1
+
+if ($null -eq $cert) {
+    Write-Error "No se encontró ningún certificado en Cert:\LocalMachine\My que coincida con '$certName'."
+    exit 1
+}
+
+# Definir bloque de script reutilizable para aplicar el certificado SSL de manera compatible
+# (Resuelve el problema de los métodos faltantes en objetos deserializados de PS7+ y fuerza SNI)
+function Set-IISBindingWithCertificate {
+    param (
+        [string]$Site,
+        [string]$HostHeader,
+        [int]$Port,
+        [string]$Thumbprint,
+        [int]$SslFlags = 1 # 1 = Habilitar SNI para evitar conflictos con AOSService
+    )
+
+    $iisAction = {
+        param($sName, $hHeader, $p, $tPrint, $sFlags)
+        Import-Module WebAdministration -WarningAction SilentlyContinue
+        
+        # Verificar si el enlace ya existe, si no, crearlo con SNI
+        $binding = Get-WebBinding -Name $sName -Protocol https -Port $p -HostHeader $hHeader | Select-Object -First 1
+        if ($null -eq $binding) {
+            # Se usa -SslFlags 1 para habilitar SNI en IIS
+            New-WebBinding -Name $sName -IPAddress "*" -Port $p -HostHeader $hHeader -Protocol https -SslFlags $sFlags
+            $binding = Get-WebBinding -Name $sName -Protocol https -Port $p -HostHeader $hHeader | Select-Object -First 1
+        }
+        
+        # Asignar certificado
+        if ($binding) {
+            $binding.AddSslCertificate($tPrint, "My")
+        } else {
+            Write-Error "No se pudo obtener el binding creado para el sitio $sName en el puerto $p con host $hHeader."
+        }
+    }
+
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        # Si corre en PowerShell Core (7.4+), delegamos a Windows PowerShell nativo
+        powershell.exe -NoProfile -NonInteractive -Command $iisAction -args $Site, $HostHeader, $Port, $Thumbprint, $SslFlags
+    } else {
+        # Si corre en PowerShell 5.1, se ejecuta directamente
+        & $iisAction $Site $HostHeader $Port $Thumbprint $SslFlags
+    }
+}
+
+# 1. Cambiar el puerto del RetailServer para liberar el puerto 443 si está ocupado
 $RetailServer = "RetailServer"
 $binding = Get-WebBinding -Name $RetailServer | Where-Object { $_.bindingInformation -like "*:${newPort}:*" }
+
 if ($binding) {
     $dummyPort = 444
-    # Obtiene la información del binding actual
     $bindingInfo = $binding.BindingInformation
     $protocol = $binding.Protocol
 
-    # Elimina el binding con el puerto actual
+    # Remover enlace conflictivo
     Remove-WebBinding -Name $RetailServer -BindingInformation $bindingInfo -Protocol $protocol
 
-    # Crea un nuevo binding con el puerto actualizado
-    New-WebBinding -Name $RetailServer -IPAddress "*" -Port $dummyPort -HostHeader $newHostname -Protocol https
-
-    # Usa -replace para realizar el cambio solo en la parte que te interesa
-    # El patrón asegura que solo se reemplace 'ret' antes de '.axcloud.dynamics.com'
-    $certName = $newHostname -replace "ret(?=\.axcloud\.dynamics\.com)", "aos"
-    $cert = Get-ChildItem -Path Cert:\LocalMachine\My | Where-Object {$_.Subject -like "*$certName*"} 
-    $binding = Get-WebBinding -Name $RetailServer -Protocol https -Port $dummyPort -HostHeader $newHostname
-    $binding.AddSslCertificate($cert.Thumbprint, "My")
-
-    Write-Host "El puerto del binding ha sido cambiado de $dummyPort a $newPort para el sitio $RetailServer."
+    # Crear nuevo enlace en puerto alternativo y aplicar certificado de forma compatible (usando SNI)
+    Set-IISBindingWithCertificate -Site $RetailServer -HostHeader $newHostname -Port $dummyPort -Thumbprint $cert.Thumbprint -SslFlags 1
+    
+    Write-Host "El puerto del binding ha sido cambiado de $newPort a $dummyPort para el sitio $RetailServer." -ForegroundColor Green
 } else {
     Write-Host "No se encontró un binding con el puerto $newPort en el sitio $RetailServer." -ForegroundColor Yellow
 }
 
-
-# Verifica si el sitio web existe
+# 2. Configurar el sitio de Store Scale Unit ($siteName)
 $site = Get-Website | Where-Object { $_.Name -eq $siteName }
 if ($null -eq $site) {
-    Write-Host "El sitio web no existe" -ForegroundColor Red
-    exit
+    Write-Error "El sitio web '$siteName' no existe."
+    exit 1
 }
 
-# Obtén todos los bindings del sitio web
+# Obtener y eliminar todos los enlaces actuales de la web CSU
 $bindings = Get-WebBinding -Name $siteName
-
-# Recorre y elimina cada binding
-foreach ($binding in $bindings) {
-    Remove-WebBinding -Name $siteName -BindingInformation $binding.BindingInformation -Protocol $binding.Protocol
+foreach ($b in $bindings) {
+    Remove-WebBinding -Name $siteName -BindingInformation $b.BindingInformation -Protocol $b.Protocol
 }
 
-# Asigna el certificado SSL
-New-WebBinding -Name $siteName -IPAddress "*" -Port $newPort -HostHeader $newHostname -Protocol https
+# Crear nuevo enlace y ASIGNAR el certificado correctamente con SNI
+Set-IISBindingWithCertificate -Site $siteName -HostHeader $newHostname -Port $newPort -Thumbprint $cert.Thumbprint -SslFlags 1
+Write-Host "Sitio $siteName configurado exitosamente en puerto $newPort con el host $newHostname y certificado SSL (SNI)." -ForegroundColor Green
