@@ -1,4 +1,4 @@
-# Commerce Store Scale Unit Setup Installer
+﻿# Commerce Store Scale Unit Setup Installer
 
 Este repositorio contiene varios scripts para la instalación inicial de un Commerce Scale Unit (SEALED) estándar de Microsoft. A continuación, se describe el contenido de cada directorio y los scripts que contiene.
 

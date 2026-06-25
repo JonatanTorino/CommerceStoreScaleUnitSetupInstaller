@@ -1,4 +1,4 @@
-. .\Support\SupportFunctions.ps1
+﻿. .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo usando función reutilizable

@@ -1,4 +1,4 @@
-#Requires -RunAsAdministrator
+﻿#Requires -RunAsAdministrator
 
 param ( #Recibir valor en este formato 00:01:00
 [parameter(Mandatory = $true

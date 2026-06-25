@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param (
     [string]
     [ValidateNotNullOrEmpty()]$jsonFile
@@ -24,10 +24,10 @@ $json = Get-Content $jsonFile -Raw | ConvertFrom-Json
 [string]$EnvironmentId = $json.EnvironmentId -replace '"', ''
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\PreInstall\InsertApplicationInsightConfigInAxDB.sql'
+$sqlScriptPath = '.\PreInstall\InsertApplicationInsightConfigInAxDB.sql'
 try {
     # Ejecutar el script SQL
-    SQLCMD -S $server -E -i $rutaScriptSQL -v AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId
+    SQLCMD -S $server -E -i $sqlScriptPath -v AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId
 }
 catch {
     Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"

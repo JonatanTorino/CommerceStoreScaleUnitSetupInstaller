@@ -1,4 +1,4 @@
-#Requires -RunAsAdministrator
+﻿#Requires -RunAsAdministrator
 
 param (
     [parameter(Mandatory = $true
@@ -24,24 +24,24 @@ Write-Host
 
 Write-Host "Este proceso de busqueda puede tardar varios minutos, " -ForegroundColor Green
 Write-Host "si ya posee instalado '$searchTerm' puede saltear este proceso" -ForegroundColor Green
-$continuar = $false
-$preguntar = $true
+$continue = $false
+$askUser = $true
 
 if ($silenceMode) {
-    $preguntar = $false
-    $continuar = $true
+    $askUser = $false
+    $continue = $true
 }
 
-while ($preguntar) {
-    $respuesta = Read-Host -Prompt "¿Desea continuar con la búsqueda? [Y|N]"
-    if ($respuesta -eq "Y" -or $respuesta -eq "N")
+while ($askUser) {
+    $answer = Read-Host -Prompt "¿Desea continuar con la búsqueda? [Y|N]"
+    if ($answer -eq "Y" -or $answer -eq "N")
     {
-        $preguntar = $false
-        $continuar = $respuesta -eq "Y"
+        $askUser = $false
+        $continue = $answer -eq "Y"
     }
 }
 
-if ($continuar) {
+if ($continue) {
     #Reemplazar el string por el patron del programa que se desee buscar
     Write-Host 
     Write-Host -ForegroundColor yellow "Buscando si esta instalado '$searchTerm'"

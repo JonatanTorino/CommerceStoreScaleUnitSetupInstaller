@@ -1,5 +1,5 @@
-param (
-    [string]$rutaRepositorio
+﻿param (
+    [string]$repositoryPath
 )
 
 . .\Support\SupportFunctions.ps1
@@ -13,10 +13,10 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 }
 
 # Nombre de la rama que deseas verificar (por ejemplo, "main" o "master")
-$nombreRama = "main"
+$branchName = "main"
 
 # Cambia al directorio del repositorio
-Set-Location $rutaRepositorio
+Set-Location $repositoryPath
 
 # Verifica si hay cambios pendientes en la rama local
 if ($null -eq (git status -s)) {
@@ -24,14 +24,14 @@ if ($null -eq (git status -s)) {
 } else {
     Write-Host -ForegroundColor Yellow "El repositorio tiene cambios pendientes en la rama local. Debes confirmarlos o descartarlos si fuese necesario descargar actualizaciones del repositorio remota."
     Write-Host "Repositorio remoto"
-    Write-Host "    $rutaRepositorio"
+    Write-Host "    $repositoryPath"
 }
 
 # Actualiza la información de la rama remota
-git fetch origin $nombreRama
+git fetch origin $branchName
 
 # Compara la rama local con la rama remota
-if ((git rev-list HEAD...origin/$nombreRama --count) -eq 0) {
+if ((git rev-list HEAD...origin/$branchName --count) -eq 0) {
     Write-Host "El repositorio está actualizado al día."
 } else {
     Write-Host "El repositorio no está actualizado. Hay cambios en la rama remota."

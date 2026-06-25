@@ -1,4 +1,4 @@
-Esta carpeta cuenta con varios scripts para la instalación inicial de un CommerceScaleUnit (SEALED) estándar de Microsoft.
+﻿Esta carpeta cuenta con varios scripts para la instalación inicial de un CommerceScaleUnit (SEALED) estándar de Microsoft.
 
 * El script InstallScaleUnit.ps1 orquesta la ejecución de los demás ps1.
 * El InstallScaleUnit.ps1 recibe como parámetro el path de un archivo json, el cual posee varias propiedades con los parámetros a usar en la instalación y demás scripts.

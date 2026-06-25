@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param (
     [string]
     [ValidateNotNullOrEmpty()]$jsonFile
@@ -19,16 +19,16 @@ $csu = . Get-CSUParameters $jsonFile
 [xml]$xml = Get-Content $ChannelConfig
 
 # Seleccionar todos los nodos 'add' con atributo 'key' que termine en 'AppInsightsInstrumentationKey'
-$nodos = $xml.SelectNodes('//add[contains(@key, "AppInsightsInstrumentationKey")]')
+$nodes = $xml.SelectNodes('//add[contains(@key, "AppInsightsInstrumentationKey")]')
 
 # Recorrer y editar los nodos encontrados
-foreach ($nodo in $nodos) {
+foreach ($node in $nodes) {
     # Modificar el atributo 'value'
-    $nodo.SetAttribute("value", $AppInsightsInstrumentationKey)  # Reemplaza "NuevoValor" con el valor deseado
+    $node.SetAttribute("value", $AppInsightsInstrumentationKey)  # Reemplaza "NuevoValor" con el valor deseado
 }
 
-$nodo = $xml.SelectSingleNode('//add[contains(@key, "EnvironmentId")]')
-$nodo.SetAttribute("value", $EnvironmentId)  # Reemplaza "NuevoValor" con el valor deseado
+$node = $xml.SelectSingleNode('//add[contains(@key, "EnvironmentId")]')
+$node.SetAttribute("value", $EnvironmentId)  # Reemplaza "NuevoValor" con el valor deseado
 
 # Guardar los cambios en el archivo
 $xml.Save($ChannelConfig)

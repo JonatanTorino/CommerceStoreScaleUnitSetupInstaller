@@ -1,4 +1,4 @@
-# SupportFunctions.ps1
+﻿# SupportFunctions.ps1
 # Descripción: Módulo con funciones de soporte reutilizables
 
 # Definir información del módulo
@@ -72,10 +72,10 @@ function GetWebConfigPath {
         [string]$webSite
     )
     # Obtiene la información del sitio web
-    $sitio = Get-WebSite -Name $webSite
+    $site = Get-WebSite -Name $webSite
 
     # Obtiene el directorio físico del sitio web
-    $physicalPath = $sitio.physicalPath
+    $physicalPath = $site.physicalPath
 
     # Construye la ruta completa del archivo web.config
     $webConfigPath = Join-Path -Path $physicalPath -ChildPath "web.config"
@@ -88,12 +88,12 @@ function GetWebSiteUrl {
         [string]$webSite
     )
     # Obtiene la información del sitio web
-    $sitio = Get-WebSite -Name $webSite
+    $site = Get-WebSite -Name $webSite
 
     # Obtiene el binding principal
-    $bindings = $sitio.bindings
+    $bindings = $site.bindings
     $binding = $bindings.Collection[0]
-    
+
     # Usar una expresión regular para extraer el host
     $hostSegment = [regex]::Match($binding.bindingInformation, ':\d+:(.+)$').Groups[1].Value
     $protocol = $binding.protocol
@@ -103,12 +103,12 @@ function GetWebSiteUrl {
 
 function GetAosServiceUrl {
     [string]$webSite = "AOSService"
-    
+
     # Obtiene la información del sitio web
-    $sitio = Get-WebSite -Name $webSite
+    $site = Get-WebSite -Name $webSite
 
     # Obtiene el binding principal
-    $bindings = $sitio.bindings
+    $bindings = $site.bindings
     $binding = $bindings.Collection | Where-Object { $_.bindingInformation -match "aos\." } | Select-Object -First 1
     
     # Usar una expresión regular para extraer el host y el puerto
@@ -123,16 +123,16 @@ function GetWebSiteCertThumbprint {
         [string]$webSite = "AOSService"
     )
     # Obtiene la información del sitio web
-    $sitio = Get-WebSite -Name $webSite
+    $site = Get-WebSite -Name $webSite
 
     # Obtiene el binding principal
-    $bindings = $sitio.bindings
+    $bindings = $site.bindings
     $binding = $bindings.Collection[0]
-    
+
     # Obtiene el certificado asociado al binding
-    $certificado = $binding.certificateHash
-    
-    return $certificado
+    $certificate = $binding.certificateHash
+
+    return $certificate
 }
 
 function PrintFileName {

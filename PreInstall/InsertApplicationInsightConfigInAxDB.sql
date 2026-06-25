@@ -1,4 +1,4 @@
-SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
+﻿SET ANSI_NULLS, QUOTED_IDENTIFIER ON;
 /*ej de uso desde SQLCMD
 	SQLCMD -S %SQLServer% -E -i "%Folder%\Restore.sql" -v FileName="%Folder%\%FileName%"
     

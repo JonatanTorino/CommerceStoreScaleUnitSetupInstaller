@@ -1,4 +1,4 @@
-param (
+﻿param (
     [string]$RepoName
 )
 
@@ -130,16 +130,16 @@ if ($latestPkgsFolderFixed) {
 
 # Crear nombre de zip con fecha y hora actual
 $now = Get-Date
-$fecha = $now.ToString("yyyyMMdd")
-$hora = $now.ToString("HH.mmtt")
-$zipName = "AIOPCSU_{0}_{1}.zip" -f $fecha, $hora
+$date = $now.ToString("yyyyMMdd")
+$time = $now.ToString("HH.mmtt")
+$zipName = "AIOPCSU_{0}_{1}.zip" -f $date, $time
 
 # Nueva ruta de destino
-$paquetesPath = "K:\Axxon\PaquetesCSU"
-if (-not (Test-Path $paquetesPath)) {
-    New-Item -Path $paquetesPath -ItemType Directory -Force | Out-Null
+$packagesPath = "K:\Axxon\PaquetesCSU"
+if (-not (Test-Path $packagesPath)) {
+    New-Item -Path $packagesPath -ItemType Directory -Force | Out-Null
 }
-$finalZipPath = Join-Path $paquetesPath $zipName
+$finalZipPath = Join-Path $packagesPath $zipName
 
 # Comprimir carpeta temporal en la nueva ruta
 Compress-Archive -Path "$tempFolder\*" -DestinationPath $finalZipPath

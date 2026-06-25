@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param (
     [string]
     # [ValidateNotNullOrEmpty()]
@@ -35,22 +35,22 @@ $StoreSystemChannelDatabaseId = Select-Xml -Xml $channelConfigXml -XPath $xPathS
 [string]$CPOSURL = '"' + $csu.CPOSUrl + '"'
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\PreInstall\InsertCmmSDKAzureActiveClientId.sql'
+$sqlScriptPath = '.\PreInstall\InsertCmmSDKAzureActiveClientId.sql'
 
     try {
         # Ejecutar el script SQL
-        SQLCMD -S $server -E -i $rutaScriptSQL -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
+        SQLCMD -S $server -E -i $sqlScriptPath -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
     }
     catch {
         Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"
     }
 
 # Ruta del archivo SQL
-$rutaScriptSQL = '.\PreInstall\InsertCmmSDKProfileConfig.sql'
+$sqlScriptPath = '.\PreInstall\InsertCmmSDKProfileConfig.sql'
 
     try {
         # Ejecutar el script SQL
-        SQLCMD -S $server -E -i $rutaScriptSQL -v StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
+        SQLCMD -S $server -E -i $sqlScriptPath -v StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
     }
     catch {
         Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"

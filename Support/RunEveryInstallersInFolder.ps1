@@ -28,14 +28,14 @@ if(Test-Path $InstallersFoldersPath){
     Stop-WebAppPoolForce -Name RetailServer
 
     # Listas para almacenar los resultados
-    $archivosTerminadosCorrectamente = @()
-    $archivosTerminadosConError = @()
+    $filesCompletedSuccessfully = @()
+    $filesCompletedWithError = @()
 
     Get-ChildItem -Path $InstallersFoldersPath -Filter *.exe | ForEach-Object {
-        $nombreArchivo = $_.Name
+        $fileName = $_.Name
         Write-Host
         Write-Host
-        Write-Host -ForegroundColor Green $nombreArchivo "|" $InstallOrUninstall
+        Write-Host -ForegroundColor Green $fileName "|" $InstallOrUninstall
 
         # Construye el comando usando las variables
         $command = $_.Fullname + " $InstallOrUninstall"
@@ -44,11 +44,11 @@ if(Test-Path $InstallersFoldersPath){
 
         # Verificar el código de salida
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "$nombreArchivo terminó correctamente."
-            $archivosTerminadosCorrectamente += $nombreArchivo
+            Write-Host "$fileName terminó correctamente."
+            $filesCompletedSuccessfully += $fileName
         } else {
-            Write-Host "$nombreArchivo finalizó con un error. Código de salida: $LASTEXITCODE"
-            $archivosTerminadosConError += $nombreArchivo
+            Write-Host "$fileName finalizó con un error. Código de salida: $LASTEXITCODE"
+            $filesCompletedWithError += $fileName
         }
     }
     # Mostrar el informe final
@@ -56,11 +56,11 @@ if(Test-Path $InstallersFoldersPath){
     Write-Host
     Write-Host "Informes de finalización:"
     Write-Host -ForegroundColor Green "Archivos que terminaron correctamente:"
-    $archivosTerminadosCorrectamente
+    $filesCompletedSuccessfully
     Write-Host
     Write-Host
     Write-Host -ForegroundColor Red "Archivos que terminaron con error:"
-    $archivosTerminadosConError
+    $filesCompletedWithError
 
     Write-Host 
     Write-Host 
