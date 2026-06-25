@@ -1,4 +1,5 @@
-﻿#Requires -RunAsAdministrator
+﻿#Requires -Version 5.0
+#Requires -RunAsAdministrator
 
 [CmdletBinding()]
 param (
@@ -8,6 +9,15 @@ param (
     ,
     [switch]$skipCheckGitRepoUpdated = $false
 )
+
+$logFile = Join-Path $PSScriptRoot "Install_$(hostname)_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+function Write-Log {
+    param([string]$Message, [string]$Color = "White")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logLine = "[$timestamp] $Message"
+    Add-Content -Path $logFile -Value $logLine -Encoding UTF8
+    Write-Host $Message -ForegroundColor $Color
+}
 
 . .\Support\SupportFunctions.ps1
 
@@ -41,19 +51,17 @@ if (Test-Path -Path $hws.SetupPath -PathType Leaf) {
         # + $(if ($skipOPOSCheck) { " --skipOPOSCheck"} )`
 
     # Ejecuta el comando y captura la salida y el código de salida
-    write-host $command -ForegroundColor Blue
+    Write-Log $command "Blue"
     Invoke-Expression $command
     $exitCode = $LASTEXITCODE
 
     # Verifica el código de salida
     if ($exitCode -eq 0) {
-        Write-Host -ForegroundColor Green "El comando se ejecutó correctamente."
+        Write-Log "El comando se ejecutó correctamente." "Green"
     } else {
-        Write-Host -ForegroundColor Red "El comando falló con el código de salida: $exitCode"
+        Write-Log "El comando falló con el código de salida: $exitCode" "Red"
     }
 }
 else {
-    Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
-    Write-Host -ForegroundColor Red "   $($csu.SetupPath)"
-    Write-Host -ForegroundColor Red "Revisar la configuración del json.HWSSetupPath que tenga la ruta completa al instalador"
+    Write-Log "ARCHIVO INSTALADOR NO ENCONTRADO. Ruta buscada: '$($hws.SetupPath)'. Verifique la propiedad HWSSetupPath en el archivo de configuración JSON." "Red"
 }

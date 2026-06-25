@@ -1,4 +1,5 @@
-﻿param (
+﻿#Requires -Version 5.0
+param (
     [string]$RepoName
 )
 

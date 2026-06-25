@@ -1,4 +1,5 @@
-﻿param (
+﻿#Requires -Version 5.0
+param (
     [string]$repositoryPath
 )
 
@@ -36,5 +37,6 @@ if ((git rev-list HEAD...origin/$branchName --count) -eq 0) {
 } else {
     Write-Host "El repositorio no está actualizado. Hay cambios en la rama remota."
     Write-Host -ForegroundColor Green "para actualizar ejecute un git pull"
-    throw [System.IO.FileNotFoundException] "Secuencia cancelada"
+    Write-Host "Secuencia cancelada. Puede reiniciar el proceso ejecutando el script nuevamente." -ForegroundColor Yellow
+    throw [System.IO.FileNotFoundException] "Secuencia cancelada. Puede reiniciar el proceso ejecutando el script nuevamente."
 }

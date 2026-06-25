@@ -1,4 +1,5 @@
-﻿#Requires -RunAsAdministrator
+﻿#Requires -Version 5.0
+#Requires -RunAsAdministrator
 
 param (
     [parameter(Mandatory = $true
@@ -33,7 +34,7 @@ if ($silenceMode) {
 }
 
 while ($askUser) {
-    $answer = Read-Host -Prompt "¿Desea continuar con la búsqueda? [Y|N]"
+    $answer = (Read-Host -Prompt "¿Desea continuar con la búsqueda? [y/Y para continuar, cualquier otra tecla para omitir]").Trim().ToUpper()
     if ($answer -eq "Y" -or $answer -eq "N")
     {
         $askUser = $false
@@ -49,7 +50,7 @@ if ($continue) {
 
     #Programa y versión concreta a buscar
     if (!$InstalledOptions -or (-NOT (@("$InstalledOptions") -match $searchTerm))) {
-        Write-Host -ForegroundColor Yellow "No encontrado"
+        Write-Host -ForegroundColor Yellow "No encontrado: '$searchTerm'. Se procederá a descargarlo."
         Write-Host -ForegroundColor yellow "Descargando " $searchTerm
         Write-Host -ForegroundColor yellow "Descargando ..."
 

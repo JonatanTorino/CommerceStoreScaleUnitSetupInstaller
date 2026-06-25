@@ -1,4 +1,5 @@
-﻿[CmdletBinding()]
+﻿#Requires -Version 5.0
+[CmdletBinding()]
 param (
     [string]
     # [ValidateNotNullOrEmpty()]
@@ -42,7 +43,7 @@ $sqlScriptPath = '.\PreInstall\InsertCmmSDKAzureActiveClientId.sql'
         SQLCMD -S $server -E -i $sqlScriptPath -v AadPOSId=$CposAadClientId AadRetailServerId=$RetailServerAadClientId AadAsyncClientId=$AsyncClientAadClientId TenantId=$TenantId StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
     }
     catch {
-        Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"
+        Write-Host "Error al ejecutar el script SQL: $($_.Exception.Message)"
     }
 
 # Ruta del archivo SQL
@@ -53,5 +54,5 @@ $sqlScriptPath = '.\PreInstall\InsertCmmSDKProfileConfig.sql'
         SQLCMD -S $server -E -i $sqlScriptPath -v StoreSystemChannelDatabaseId=$StoreSystemChannelDatabaseId RetailServerURL=$RetailServerURL CPOSURL=$CPOSURL
     }
     catch {
-        Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"
+        Write-Host "Error al ejecutar el script SQL: $($_.Exception.Message)"
     }

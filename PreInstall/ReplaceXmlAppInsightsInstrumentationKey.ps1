@@ -1,4 +1,5 @@
-﻿[CmdletBinding()]
+﻿#Requires -Version 5.0
+[CmdletBinding()]
 param (
     [string]
     [ValidateNotNullOrEmpty()]$jsonFile
@@ -31,6 +32,10 @@ $node = $xml.SelectSingleNode('//add[contains(@key, "EnvironmentId")]')
 $node.SetAttribute("value", $EnvironmentId)  # Reemplaza "NuevoValor" con el valor deseado
 
 # Guardar los cambios en el archivo
+$backupPath = "$ChannelConfig.backup"
+if (-not (Test-Path $backupPath)) {
+    Copy-Item -Path $ChannelConfig -Destination $backupPath
+}
 $xml.Save($ChannelConfig)
 
 Write-Host "Los atributos 'value' se han editado en el archivo XML $ChannelConfig."

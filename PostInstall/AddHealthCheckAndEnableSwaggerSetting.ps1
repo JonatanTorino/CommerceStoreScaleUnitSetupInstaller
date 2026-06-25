@@ -1,4 +1,5 @@
-﻿#Requires -RunAsAdministrator
+﻿#Requires -Version 5.0
+#Requires -RunAsAdministrator
 
 . .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
@@ -57,5 +58,9 @@ if ($nodeNotFoundEnableSwagger) {
 }
 
 if ($saveXml) {
+    $backupPath = "$filePath.backup"
+    if (-not (Test-Path $backupPath)) {
+        Copy-Item -Path $filePath -Destination $backupPath
+    }
     $xml.Save($filePath)
 }

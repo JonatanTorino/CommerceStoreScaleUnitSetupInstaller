@@ -1,4 +1,5 @@
-﻿[CmdletBinding()]
+﻿#Requires -Version 5.0
+[CmdletBinding()]
 param (
     [string]
     [ValidateNotNullOrEmpty()]$jsonFile
@@ -8,7 +9,7 @@ param (
 PrintFileName $MyInvocation.MyCommand.Name
 
 if (-not (Test-Path $jsonFile)) {
-    throw [System.IO.FileNotFoundException] "$jsonFile not found."
+    throw "Archivo de configuración no encontrado: '$jsonFile'"
 }
 
 #Parseo el archivo json para leer sus propiedades

@@ -1,4 +1,5 @@
-﻿. .\Support\SupportFunctions.ps1
+﻿#Requires -Version 5.0
+. .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name
 
 # Crear archivo usando función reutilizable

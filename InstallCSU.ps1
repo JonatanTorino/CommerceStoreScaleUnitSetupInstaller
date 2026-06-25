@@ -1,4 +1,5 @@
-﻿#Requires -RunAsAdministrator
+﻿#Requires -Version 5.0
+#Requires -RunAsAdministrator
 
 [CmdletBinding()]
 param (
@@ -8,6 +9,15 @@ param (
     ,
     [switch]$skipCheckGitRepoUpdated = $false
 )
+
+$logFile = Join-Path $PSScriptRoot "Install_$(hostname)_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+function Write-Log {
+    param([string]$Message, [string]$Color = "White")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logLine = "[$timestamp] $Message"
+    Add-Content -Path $logFile -Value $logLine -Encoding UTF8
+    Write-Host $Message -ForegroundColor $Color
+}
 
 . .\Support\SupportFunctions.ps1
 
@@ -28,14 +38,6 @@ if ([string]::IsNullOrEmpty($jsonFile)) {
 .\PreInstall\ReplaceXmlAppInsightsInstrumentationKey.ps1 $jsonFile 
 
 if ($skipHostingBudle -eq $false) {
-    #Programa y versión concreta a buscar
-    # $HostingBudle = "Microsoft ASP.NET Core 6.0.35 Hosting Bundle Options"
-    # $url = "https://download.visualstudio.microsoft.com/download/pr/59c72253-7750-4f34-8804-4fb326754c4f/b83a6a459d49b6127757b4f873ba459f/dotnet-hosting-6.0.35-win.exe"
-    # $HostingBudle = "Microsoft ASP.NET Core 8.0.11 Hosting Bundle Options"
-    # $url = "https://download.visualstudio.microsoft.com/download/pr/4956ec5e-8502-4454-8f28-40239428820f/e7181890eed8dfa11cefbf817c4e86b0/dotnet-hosting-8.0.11-win.exe"
-    # $HostingBudle = "Microsoft ASP.NET Core 8.0.15 Hosting Bundle Options"
-    # $url = "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/8.0.15/dotnet-hosting-8.0.15-win.exe"
-    # .\Support\CheckAndDownload.ps1 $HostingBudle $url 
     winget install Microsoft.DotNet.HostingBundle.8
 }
 
@@ -66,7 +68,7 @@ if (Test-Path -Path $csu.SetupPath -PathType Leaf) {
         # + $(if ($skipOPOSCheck) { " --skipOPOSCheck"} )`
 
     # Ejecuta el comando
-    write-host $command
+    Write-Log $command
     Invoke-Expression $command
     $exitCode = $LASTEXITCODE
     
@@ -79,7 +81,5 @@ if (Test-Path -Path $csu.SetupPath -PathType Leaf) {
     }
 }
 else {
-    Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
-    Write-Host -ForegroundColor Red "   $($csu.SetupPath)"
-    Write-Host -ForegroundColor Red "Revisar la configuración del json.CSUSetupPath que tenga la ruta completa al instalador"
+    Write-Log "ARCHIVO INSTALADOR NO ENCONTRADO. Ruta buscada: '$($csu.SetupPath)'. Verifique la propiedad CSUSetupPath en el archivo de configuración JSON." "Red"
 }

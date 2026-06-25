@@ -1,9 +1,63 @@
-﻿# SupportFunctions.ps1
+﻿#Requires -Version 5.0
+# SupportFunctions.ps1
 # Descripción: Módulo con funciones de soporte reutilizables
 
 # Definir información del módulo
 # $ModuleVersion = "1.0.1"
 # $Author = "Jonatan Torino"
+
+function Stop-WebAppPoolForce {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Name
+    )
+    try {
+        Stop-WebAppPool -Name $Name -ErrorAction SilentlyContinue
+        Write-Host "Operacion de detención completada para '$Name'"
+    } catch {
+        Write-Host "El AppPool '$Name' ya está detenido."
+    }
+}
+
+function Invoke-InstallerWithTracking {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$InstallerPath,
+        [Parameter(Mandatory=$true)]
+        [string]$Action,
+        [ref]$CompletedSuccessfully,
+        [ref]$CompletedWithError
+    )
+    $fileName = Split-Path $InstallerPath -Leaf
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor Green "$fileName | $Action"
+    $command = "$InstallerPath $Action"
+    Invoke-Expression $command
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "$fileName terminó correctamente."
+        $CompletedSuccessfully.Value += $fileName
+    } else {
+        Write-Host "$fileName finalizó con un error. Código de salida: $LASTEXITCODE"
+        $CompletedWithError.Value += $fileName
+    }
+}
+
+function Show-InstallerSummary {
+    param(
+        [string[]]$CompletedSuccessfully,
+        [string[]]$CompletedWithError
+    )
+    Write-Host
+    Write-Host
+    Write-Host "Informes de finalización:"
+    Write-Host -ForegroundColor Green "Archivos que terminaron correctamente:"
+    $CompletedSuccessfully
+    Write-Host
+    Write-Host
+    Write-Host -ForegroundColor Red "Archivos que terminaron con error:"
+    $CompletedWithError
+}
 
 function Get-OSInfo {
     # Determinar si es un sistema operativo de servidor o cliente
@@ -222,9 +276,15 @@ function CreateNewCertificate {
     # Importar el certificado al almacén de Trusted Root Certification Authorities
     $rootStore = "Cert:\LocalMachine\Root"
     Write-Host -ForegroundColor Yellow "Importando el certificado al almacén de Trusted Root Certification Authorities."
-    $certNew | Export-Certificate -FilePath "$env:TEMP\$friendlyName.cer" -Force
-    Import-Certificate -FilePath "$env:TEMP\$friendlyName.cer" -CertStoreLocation $rootStore
-    Remove-Item -Path "$env:TEMP\$friendlyName.cer" -Force
+    $certTempPath = Join-Path $env:TEMP "cert_temp_$([System.Guid]::NewGuid()).cer"
+    try {
+        Export-Certificate -Cert $certNew -FilePath $certTempPath -Force | Out-Null
+        Import-Certificate -FilePath $certTempPath -CertStoreLocation $rootStore
+    } finally {
+        if (Test-Path $certTempPath) {
+            Remove-Item -Path $certTempPath -Force -ErrorAction SilentlyContinue
+        }
+    }
 }
 
 function GetJsonConfig {

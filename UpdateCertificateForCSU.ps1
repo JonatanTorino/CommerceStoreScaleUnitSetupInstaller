@@ -1,4 +1,5 @@
-﻿[CmdletBinding()]
+﻿#Requires -Version 5.0
+[CmdletBinding()]
 param (
     [string]$jsonFile
     ,
@@ -43,7 +44,5 @@ if (Test-Path -Path $CSUSetupPath -PathType Leaf) {
     # $exitCode = $LASTEXITCODE
 }
 else {
-    Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO"
-    Write-Host -ForegroundColor Red "   $CSUSetupPath"
-    Write-Host -ForegroundColor Red "Revisar la configuración del json.CSUSetupPath"
+    Write-Host -ForegroundColor Red "ARCHIVO INSTALADOR NO ENCONTRADO. Ruta buscada: '$CSUSetupPath'. Verifique la propiedad CSUSetupPath en el archivo de configuración JSON."
 }

@@ -1,4 +1,5 @@
-﻿param (
+﻿#Requires -Version 5.0
+param (
     [string]$AIOPPATH,
     [string]$PKGSPATH
 )
@@ -22,18 +23,7 @@ if (-not $PKGSPATH) {
     $PKGSPATH = Read-Host "Ingrese la ruta de destino para los archivos .nupkg (o presione ENTER para omitir este paso)"
 }
 
-function Stop-WebAppPoolForce {
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$Name
-    )
-    try {
-        Stop-WebAppPool -Name $Name -ErrorAction SilentlyContinue
-        Write-Host "Operacion de detención completada para '$Name'"
-    } catch {
-        Write-Host "El AppPool '$Name' ya está detenido."
-    }
-}
+. "$installerRepo\SupportFunctions.ps1"
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
@@ -56,98 +46,80 @@ $ExtFolder = Join-Path $AIOPBase "ext"
 Stop-WebAppPoolForce -Name RssuCore
 Stop-WebAppPoolForce -Name RetailServer
 
-# Listas para almacenar los resultados
-$filesCompletedSuccessfully = @()
-$filesCompletedWithError = @()
+try {
+    # Listas para almacenar los resultados
+    $filesCompletedSuccessfully = @()
+    $filesCompletedWithError = @()
 
-$InstallOrUninstall = "install"
+    $InstallOrUninstall = "install"
 
-if (Test-Path $InstallersFoldersPath) {
-    Get-ChildItem -Path $InstallersFoldersPath -Filter *.exe -Recurse | ForEach-Object {
-        $fileName = $_.Name
-        Write-Host
-        Write-Host
-        Write-Host -ForegroundColor Green "$fileName | $InstallOrUninstall"
+    if (Test-Path $InstallersFoldersPath) {
+        Get-ChildItem -Path $InstallersFoldersPath -Filter *.exe -Recurse | ForEach-Object {
+            Invoke-InstallerWithTracking -InstallerPath $_.FullName -Action $InstallOrUninstall `
+                -CompletedSuccessfully ([ref]$filesCompletedSuccessfully) `
+                -CompletedWithError ([ref]$filesCompletedWithError)
+        }
+    } else {
+        Write-Host "No se encontró la carpeta ExtensionsPackageInstallers en $InstallersFoldersPath"
+    }
 
-        $command = $_.Fullname + " $InstallOrUninstall"
-        Invoke-Expression $command
+    Show-InstallerSummary -CompletedSuccessfully $filesCompletedSuccessfully -CompletedWithError $filesCompletedWithError
 
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "$fileName terminó correctamente."
-            $filesCompletedSuccessfully += $fileName
+    $destinationPath = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Extensions\ext"
+    if (Test-Path $destinationPath) {
+        Remove-Item -Path $destinationPath -Recurse -Force
+        Write-Host "Existing 'ext' folder deleted."
+    } else {
+        Write-Host "No existing 'ext' folder found."
+    }
+
+    if (Test-Path $ExtFolder) {
+        Copy-Item -Path $ExtFolder -Destination $destinationPath -Recurse
+        Write-Host "New 'ext' folder copied from '$ExtFolder' to '$destinationPath'."
+
+        $oldConfig = Join-Path $destinationPath "CommerceRuntime.ext.config"
+        if (Test-Path $oldConfig) {
+            Rename-Item -Path $oldConfig -NewName "Extension.config" -Force
+            Write-Host "Archivo 'CommerceRuntime.ext.config' renombrado a 'Extension.config'."
         } else {
-            Write-Host "$fileName finalizó con un error. Código de salida: $LASTEXITCODE"
-            $filesCompletedWithError += $fileName
+            Write-Host "El archivo 'CommerceRuntime.ext.config' no se encontró para renombrar."
         }
-    }
-} else {
-    Write-Host "No se encontró la carpeta ExtensionsPackageInstallers en $InstallersFoldersPath"
-}
-
-# Mostrar el informe final
-Write-Host
-Write-Host
-Write-Host "Informes de finalización:"
-Write-Host -ForegroundColor Green "Archivos que terminaron correctamente:"
-$filesCompletedSuccessfully
-Write-Host
-Write-Host
-Write-Host -ForegroundColor Red "Archivos que terminaron con error:"
-$filesCompletedWithError
-
-Write-Host
-Write-Host
-Start-WebAppPool -Name RssuCore
-Write-Host
-Write-Host
-
-$destinationPath = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Extensions\ext"
-if (Test-Path $destinationPath) {
-    Remove-Item -Path $destinationPath -Recurse -Force
-    Write-Host "Existing 'ext' folder deleted."
-} else {
-    Write-Host "No existing 'ext' folder found."
-}
-
-if (Test-Path $ExtFolder) {
-    Copy-Item -Path $ExtFolder -Destination $destinationPath -Recurse
-    Write-Host "New 'ext' folder copied from '$ExtFolder' to '$destinationPath'."
-
-    $oldConfig = Join-Path $destinationPath "CommerceRuntime.ext.config"
-    if (Test-Path $oldConfig) {
-        Rename-Item -Path $oldConfig -NewName "Extension.config" -Force
-        Write-Host "Archivo 'CommerceRuntime.ext.config' renombrado a 'Extension.config'."
     } else {
-        Write-Host "El archivo 'CommerceRuntime.ext.config' no se encontró para renombrar."
+        Write-Host "Source path '$ExtFolder' does not exist. Please check the path."
     }
-} else {
-    Write-Host "Source path '$ExtFolder' does not exist. Please check the path."
-}
 
-$parentPath = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Extensions"
-Get-ChildItem -Path $parentPath -Directory | Where-Object { $_.Name -ne "ext" } | ForEach-Object {
-    Remove-Item -Path $_.FullName -Recurse -Force
-    Write-Host "Carpeta '$($_.Name)' eliminada."
-}
-Write-Host "Proceso completado. Solo la carpeta 'ext' permanece."
+    $parentPath = "C:\Program Files\Microsoft Dynamics 365\10.0\Commerce Scale Unit\Extensions"
+    Get-ChildItem -Path $parentPath -Directory | Where-Object { $_.Name -ne "ext" } | ForEach-Object {
+        Remove-Item -Path $_.FullName -Recurse -Force
+        Write-Host "Carpeta '$($_.Name)' eliminada."
+    }
+    Write-Host "Proceso completado. Solo la carpeta 'ext' permanece."
 
-# --- BLOQUE OPCIONAL PARA COPIAR LOS .nupkg ---
-if ($PKGSPATH -and $PKGSPATH.Trim() -ne "") {
-    $PkgsSource = Join-Path $AIOPBase "pkgsIP"
-    if (Test-Path $PkgsSource) {
-        if (-not (Test-Path $PKGSPATH)) {
-            New-Item -Path $PKGSPATH -ItemType Directory | Out-Null
+    # --- BLOQUE OPCIONAL PARA COPIAR LOS .nupkg ---
+    if ($PKGSPATH -and $PKGSPATH.Trim() -ne "") {
+        $PkgsSource = Join-Path $AIOPBase "pkgsIP"
+        if (Test-Path $PkgsSource) {
+            if (-not (Test-Path $PKGSPATH)) {
+                New-Item -Path $PKGSPATH -ItemType Directory | Out-Null
+            }
+            Get-ChildItem -Path $PkgsSource -Filter *.nupkg | ForEach-Object {
+                Copy-Item -Path $_.FullName -Destination $PKGSPATH -Force
+                Write-Host "Archivo '$($_.Name)' copiado a '$PKGSPATH'."
+            }
+            Write-Host "Todos los archivos .nupkg fueron copiados a '$PKGSPATH'."
+        } else {
+            Write-Host -ForegroundColor Yellow "No se encontró la carpeta 'pkgs' en la ruta de origen."
         }
-        Get-ChildItem -Path $PkgsSource -Filter *.nupkg | ForEach-Object {
-            Copy-Item -Path $_.FullName -Destination $PKGSPATH -Force
-            Write-Host "Archivo '$($_.Name)' copiado a '$PKGSPATH'."
-        }
-        Write-Host "Todos los archivos .nupkg fueron copiados a '$PKGSPATH'."
     } else {
-        Write-Host -ForegroundColor Yellow "No se encontró la carpeta 'pkgs' en la ruta de origen."
+        Write-Host "No se especificó ruta de destino para los paquetes .nupkg. Este paso se omite."
     }
-} else {
-    Write-Host "No se especificó ruta de destino para los paquetes .nupkg. Este paso se omite."
+} finally {
+    Write-Host
+    Write-Host
+    Start-WebAppPool -Name RssuCore
+    Start-WebAppPool -Name RetailServer
+    Write-Host
+    Write-Host
 }
 
 # Limpiar temporal si se extrajo zip

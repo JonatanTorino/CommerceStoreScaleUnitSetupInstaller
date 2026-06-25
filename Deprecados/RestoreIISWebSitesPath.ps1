@@ -1,4 +1,5 @@
-﻿#Requires -RunAsAdministrator
+﻿#Requires -Version 5.0
+#Requires -RunAsAdministrator
 
 . .\Support\SupportFunctions.ps1
 PrintFileName $MyInvocation.MyCommand.Name

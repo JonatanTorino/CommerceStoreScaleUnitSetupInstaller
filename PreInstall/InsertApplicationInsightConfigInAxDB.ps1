@@ -1,4 +1,5 @@
-﻿[CmdletBinding()]
+﻿#Requires -Version 5.0
+[CmdletBinding()]
 param (
     [string]
     [ValidateNotNullOrEmpty()]$jsonFile
@@ -30,5 +31,5 @@ try {
     SQLCMD -S $server -E -i $sqlScriptPath -v AppInsightsInstrumentationKey=$AppInsightsInstrumentationKey TelemetryAppName=$TelemetryAppName EnvironmentId=$EnvironmentId
 }
 catch {
-    Write-Host "Error al ejecutar el script SQL: $_.Exception.Message"
+    Write-Host "Error al ejecutar el script SQL: $($_.Exception.Message)"
 }
