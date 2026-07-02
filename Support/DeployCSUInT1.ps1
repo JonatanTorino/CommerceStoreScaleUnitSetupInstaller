@@ -1,12 +1,10 @@
 param (
+    [Parameter(Mandatory=$true)]
     [string]$AIOPPATH,
+    
+    [Parameter(Mandatory=$true)]
     [string]$PKGSPATH
 )
-
-# Solicitar AIOPPATH si no se asignó
-if (-not $AIOPPATH) {
-    $AIOPPATH = Read-Host "Ingrese carpeta AIOP o el archivo zip"
-}
 
 # Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
 $installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -16,11 +14,6 @@ Push-Location $installerRepoRoot
 git fetch
 git pull
 Pop-Location
-
-# Solicitar PKGSPATH si no se asignó
-if (-not $PKGSPATH) {
-    $PKGSPATH = Read-Host "Ingrese la ruta de destino para los archivos .nupkg (o presione ENTER para omitir este paso)"
-}
 
 function Stop-WebAppPoolForce {
     param(
@@ -131,20 +124,20 @@ Get-ChildItem -Path $parentPath -Directory | Where-Object { $_.Name -ne "ext" } 
 }
 Write-Host "Proceso completado. Solo la carpeta 'ext' permanece."
 
-# --- BLOQUE OPCIONAL PARA COPIAR LOS .nupkg ---
+# --- BLOQUE OPCIONAL PARA COPIAR LA CARPETA pkgsIP ---
 if ($PKGSPATH -and $PKGSPATH.Trim() -ne "") {
     $PkgsSource = Join-Path $AIOPBase "pkgsIP"
+    $PkgsDest = Join-Path $PKGSPATH "pkgsIP"
     if (Test-Path $PkgsSource) {
-        if (-not (Test-Path $PKGSPATH)) {
-            New-Item -Path $PKGSPATH -ItemType Directory | Out-Null
+        # Si ya existe la carpeta pkgsIP en destino, eliminarla
+        if (Test-Path $PkgsDest) {
+            Remove-Item -Path $PkgsDest -Recurse -Force
+            Write-Host "Carpeta existente 'pkgsIP' eliminada en '$PKGSPATH'."
         }
-        Get-ChildItem -Path $PkgsSource -Filter *.nupkg | ForEach-Object {
-            Copy-Item -Path $_.FullName -Destination $PKGSPATH -Force
-            Write-Host "Archivo '$($_.Name)' copiado a '$PKGSPATH'."
-        }
-        Write-Host "Todos los archivos .nupkg fueron copiados a '$PKGSPATH'."
+        Copy-Item -Path $PkgsSource -Destination $PKGSPATH -Recurse
+        Write-Host "Carpeta 'pkgsIP' copiada desde '$PkgsSource' a '$PKGSPATH'."
     } else {
-        Write-Host -ForegroundColor Yellow "No se encontró la carpeta 'pkgs' en la ruta de origen."
+        Write-Host -ForegroundColor Yellow "No se encontró la carpeta 'pkgsIP' en la ruta de origen."
     }
 } else {
     Write-Host "No se especificó ruta de destino para los paquetes .nupkg. Este paso se omite."

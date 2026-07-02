@@ -1,10 +1,7 @@
 param (
+    [Parameter(Mandatory=$true)]
     [string]$RepoName
 )
-
-if (-not $RepoName) {
-    $RepoName = Read-Host "Ingrese el nombre del repositorio"
-}
 
 # Actualizar el propio repositorio CommerceStoreScaleUnitSetupInstaller
 $installerRepo = Split-Path -Parent $MyInvocation.MyCommand.Path
