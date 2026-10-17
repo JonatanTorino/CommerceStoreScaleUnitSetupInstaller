@@ -62,7 +62,7 @@ Este directorio contiene scripts de soporte y utilidades.
 - `CreateLocalConfigFileForHWS.ps1`: Crea un archivo de configuración para el Hardware Station a partir del archivo de muestra, completando valores que pueden ser recuperados localmente del entorno.
 - `InstallCSU.ps1`: Orquesta la instalación del Commerce Scale Unit.
 - `InstallHWS.ps1`: Orquesta la instalación del Hardware Station.
-- `UpdateAfterRefreshDB.ps1`: Actualiza la configuración después de refrescar la base de datos.
+- `UpdateAxDBConfigForCSU.ps1`: Vuelve a aplicar en la AxDB las configuraciones del CSU (telemetría, AadClientIds y perfil de Commerce SDK). Útil después de restaurar un `.bak` de otro entorno sobre la AxDB.
 - `UpdateCertificateForCSU.ps1`: Actualiza los certificados para CSU. (Útil cuando se hace una rotación de certificados).
 
 ## Instrucciones de Uso
