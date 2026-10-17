@@ -1,65 +1,87 @@
 [CmdletBinding()]
 param (
     [string]
-    [ValidateNotNullOrEmpty()]$jsonFile
+    [ValidateNotNullOrEmpty()]
+    $jsonFile
 )
 
-. .\Support\SupportFunctions.ps1
-PrintFileName $MyInvocation.MyCommand.Name
+$ErrorActionPreference = 'Stop'
+. (Join-Path -Path $PSScriptRoot -ChildPath '..\Support\SupportFunctions.ps1')
 
-if (-not (Test-Path $jsonFile)) {
+if (-not (Test-Path -LiteralPath $jsonFile -PathType Leaf)) {
     throw [System.IO.FileNotFoundException] "$jsonFile not found."
 }
 
-#Parseo el archivo json para leer sus propiedades
-$csu = . Get-CSUParameters $jsonFile 
+$jsonFile = (Resolve-Path -LiteralPath $jsonFile).Path
+$csu = . Get-CSUParameters -jsonFile $jsonFile
 
-#Inicializo cada variable del json
-$ChannelConfig = $csu.ChannelConfig
+$configurationChecks = @(
+    [PSCustomObject]@{ Name = 'RetailServerURL'; Value = $csu.RetailServerURL; MaximumLength = 2046; IsUrl = $true },
+    [PSCustomObject]@{ Name = 'CPOSUrl'; Value = $csu.CPOSUrl; MaximumLength = 2046; IsUrl = $true },
+    [PSCustomObject]@{ Name = 'RetailServerAadClientId'; Value = $csu.RetailServerAadClientId; MaximumLength = 38; IsUrl = $false },
+    [PSCustomObject]@{ Name = 'CposAadClientId'; Value = $csu.CposAadClientId; MaximumLength = 38; IsUrl = $false },
+    [PSCustomObject]@{ Name = 'AsyncClientAadClientId'; Value = $csu.AsyncClientAadClientId; MaximumLength = 38; IsUrl = $false },
+    [PSCustomObject]@{ Name = 'EnvironmentId'; Value = $csu.EnvironmentId; MaximumLength = 255; IsUrl = $false }
+)
 
-#Comprobamos existencia del xml del ChannelConfig obtenido de D365FO
-if (-not (Test-Path $ChannelConfig)) {
-    Write-Host -ForegroundColor Yellow "Falta especificar o descargar el archivo XMl de ChannelConfig"
-    Write-Host -ForegroundColor Yellow "Se descarga desde la ruta"
-    Write-Host -ForegroundColor Yellow "D365FO > Retail and commerce > Headquarters setup > Commerce scheduler > Channel database"
-    Pause
-    
-#Inicializo las URLs de los MenuItems que se van usar.
-    $url = GetAosServiceUrl
-    $miRetailCDXDataStore = $url + "/?mi=RetailStoreTable&lng=en-us"
-
-    Start-Process $miRetailCDXDataStore
-    throw [System.IO.FileNotFoundException] "$ChannelConfig not found."
+foreach ($configurationCheck in $configurationChecks) {
+    $value = Assert-NotNullOrWhiteSpace -Name $configurationCheck.Name -Value $configurationCheck.Value
+    if ($value.Length -gt $configurationCheck.MaximumLength) {
+        throw "El parámetro de configuración '$($configurationCheck.Name)' supera la longitud máxima de $($configurationCheck.MaximumLength) caracteres."
+    }
+    if ($configurationCheck.IsUrl -and -not (Test-HttpUrl -Value $value)) {
+        throw "El parámetro de configuración '$($configurationCheck.Name)' debe ser una URL HTTP o HTTPS sin barra final."
+    }
 }
 
-#Obtento el TenantId del archivo ChannelConfig referenciado en el json de configuración
-[xml]$ChannelConfigXml = Get-Content $ChannelConfig
-$xPathAsyncClientAppInsightsInstrumentationKey = "/configuration/appSettings/add[@key='AsyncClientAppInsightsInstrumentationKey']/@value"
-$xPathCloudPosAppInsightsInstrumentationKey = "/configuration/appSettings/add[@key='CloudPosAppInsightsInstrumentationKey']/@value"
-$xPathRetailServerAppInsightsInstrumentationKey = "/configuration/appSettings/add[@key='RetailServerAppInsightsInstrumentationKey']/@value"
-
-$AsyncClientAppInsightsInstrumentationKey = Select-Xml -Xml $ChannelConfigXml -XPath $xPathAsyncClientAppInsightsInstrumentationKey
-$CloudPosAppInsightsInstrumentationKey = Select-Xml -Xml $ChannelConfigXml -XPath $xPathCloudPosAppInsightsInstrumentationKey
-$RetailServerAppInsightsInstrumentationKey = Select-Xml -Xml $ChannelConfigXml -XPath $xPathRetailServerAppInsightsInstrumentationKey
-
-if ($null -eq $AsyncClientAppInsightsInstrumentationKey.Node.Value -Or 
-    $null -eq $CloudPosAppInsightsInstrumentationKey.Node.Value -Or 
-    $null -eq $RetailServerAppInsightsInstrumentationKey.Node.Value)
-{
-    throw "El archivo $ChannelConfig tiene AppInsightsInstrumentationKey faltantes."
+$channelConfigPath = $null
+if (-not [string]::IsNullOrWhiteSpace($csu.ChannelConfig)) {
+    if (Test-Path -LiteralPath $csu.ChannelConfig -PathType Leaf) {
+        $channelConfigPath = (Resolve-Path -LiteralPath $csu.ChannelConfig).Path
+    }
+    else {
+        $candidatePaths = @(
+            (Join-Path -Path (Split-Path -Parent $jsonFile) -ChildPath $csu.ChannelConfig),
+            (Join-Path -Path (Split-Path -Parent $PSScriptRoot) -ChildPath $csu.ChannelConfig)
+        )
+        foreach ($candidatePath in $candidatePaths) {
+            if (Test-Path -LiteralPath $candidatePath -PathType Leaf) {
+                $channelConfigPath = (Resolve-Path -LiteralPath $candidatePath).Path
+                break
+            }
+        }
+    }
 }
 
-$xPathEnvironmentId  = "/configuration/appSettings/add[@key='EnvironmentId']/@value"
-$EnvironmentId = Select-Xml -Xml $ChannelConfigXml -XPath $xPathEnvironmentId
-$EnvironmentIdjson = $csu.EnvironmentId -replace '"', ''
-$EnvironmentIdXml = $EnvironmentId.Node.Value
-if ($null -eq $EnvironmentId.Node.Value)
-{
-    throw "El archivo $ChannelConfig tiene EnvironmentId faltante."
+if ([string]::IsNullOrWhiteSpace($channelConfigPath)) {
+    throw "El archivo ChannelConfig no existe o no está configurado."
 }
-if ($csu.EnvironmentId -ne $EnvironmentId.Node.Value)
-{
-    Write-Host "JsonFile        EnvironmentId $EnvironmentIdjson"
-    Write-Host "ChannelConfig   EnvironmentId $EnvironmentIdXml"
-    throw "El archivo $ChannelConfig tiene un EnvironmentId diferente al del $jsonFile"
+
+try {
+    [xml]$channelConfigXml = Get-Content -LiteralPath $channelConfigPath -Raw -ErrorAction Stop
 }
+catch {
+    throw "No se pudo cargar el archivo ChannelConfig '$channelConfigPath': $($_.Exception.Message)"
+}
+
+$appInsightsKeys = @(
+    'AsyncClientAppInsightsInstrumentationKey',
+    'CloudPosAppInsightsInstrumentationKey',
+    'RetailServerAppInsightsInstrumentationKey'
+)
+
+foreach ($appInsightsKey in $appInsightsKeys) {
+    $value = Get-XmlAppSettingValue -ConfigXml $channelConfigXml -Key $appInsightsKey
+    Assert-NotNullOrWhiteSpace -Name $appInsightsKey -Value $value | Out-Null
+}
+
+$environmentIdJson = Assert-NotNullOrWhiteSpace -Name 'EnvironmentId' -Value $csu.EnvironmentId
+$environmentIdXmlValue = Get-XmlAppSettingValue -ConfigXml $channelConfigXml -Key 'EnvironmentId'
+$environmentIdXml = Assert-NotNullOrWhiteSpace -Name 'ChannelConfig EnvironmentId' -Value $environmentIdXmlValue
+
+if ($environmentIdJson -ne $environmentIdXml) {
+    throw "El archivo $channelConfigPath tiene un EnvironmentId diferente al del $jsonFile."
+}
+
+Assert-NotNullOrWhiteSpace -Name 'TenantId' -Value (Get-XmlAppSettingValue -ConfigXml $channelConfigXml -Key 'TenantId') | Out-Null
+Assert-NotNullOrWhiteSpace -Name 'StoreSystemChannelDatabaseId' -Value (Get-XmlAppSettingValue -ConfigXml $channelConfigXml -Key 'StoreSystemChannelDatabaseId') | Out-Null

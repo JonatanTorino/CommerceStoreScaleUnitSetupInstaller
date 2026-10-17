@@ -235,14 +235,15 @@ function GetJsonConfig {
         [string]$Suffix
     )
 
-    $ConfigPath = ".\ConfigFiles\"
-    # If no explicit file provided, look for environment-specific default
+    $repositoryRoot = Split-Path -Parent $PSScriptRoot
+    $configPath = Join-Path -Path $repositoryRoot -ChildPath 'ConfigFiles'
+
     if ([string]::IsNullOrEmpty($JsonFile)) {
         $environmentName = [System.Environment]::MachineName
-        $defaultConfigPath = Join-Path -Path $ConfigPath -ChildPath "$environmentName.$Suffix.json"
-        
+        $defaultConfigPath = Join-Path -Path $configPath -ChildPath "$environmentName.$Suffix.json"
+
         Write-Host "No explicit JSON file provided. Looking for default configuration at: $defaultConfigPath"
-        
+
         try {
             if (-not (Test-Path -Path $defaultConfigPath -PathType Leaf)) {
                 throw [System.IO.FileNotFoundException] "Default configuration file not found: $defaultConfigPath"
@@ -256,8 +257,67 @@ function GetJsonConfig {
             throw
         }
     }
+    else {
+        if (-not (Test-Path -LiteralPath $JsonFile -PathType Leaf)) {
+            $repositoryConfigPath = Join-Path -Path $repositoryRoot -ChildPath $JsonFile
+            if (Test-Path -LiteralPath $repositoryConfigPath -PathType Leaf) {
+                $JsonFile = $repositoryConfigPath
+            }
+        }
+    }
 
-    return $JsonFile
+    if (-not (Test-Path -LiteralPath $JsonFile -PathType Leaf)) {
+        throw [System.IO.FileNotFoundException] "Configuration file not found: $JsonFile"
+    }
+
+    return (Resolve-Path -LiteralPath $JsonFile).Path
+}
+
+function Assert-NotNullOrWhiteSpace {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [AllowNull()]
+        [string]$Value
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        throw "El parámetro de configuración '$Name' es obligatorio y no puede estar vacío."
+    }
+
+    return $Value.Trim()
+}
+
+function Test-HttpUrl {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Value
+    )
+
+    [Uri]$uri = $null
+    $isValid = [Uri]::TryCreate($Value, [UriKind]::Absolute, [ref]$uri) `
+        -and ($uri.Scheme -eq [Uri]::UriSchemeHttp -or $uri.Scheme -eq [Uri]::UriSchemeHttps) `
+        -and -not $Value.EndsWith('/', [System.StringComparison]::Ordinal)
+
+    return $isValid
+}
+
+function Get-XmlAppSettingValue {
+    param (
+        [Parameter(Mandatory = $true)]
+        [xml]$ConfigXml,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Key
+    )
+
+    $result = Select-Xml -Xml $ConfigXml -XPath "/configuration/appSettings/add[@key='$Key']/@value"
+    if ($null -eq $result -or $null -eq $result.Node) {
+        return $null
+    }
+
+    return $result.Node.Value
 }
 
 function ExistsAosServiceFolder {
@@ -351,14 +411,27 @@ function Get-CSUParameters{
         [string]$jsonFile
     )
 
-    # Cargar el archivo JSON
-    $json = Get-Content $jsonFile -Raw -Encoding utf8 | ConvertFrom-Json
+    if (-not (Test-Path -LiteralPath $jsonFile -PathType Leaf)) {
+        throw [System.IO.FileNotFoundException] "Configuration file not found: $jsonFile"
+    }
+
+    try {
+        $json = Get-Content -LiteralPath $jsonFile -Raw -Encoding utf8 -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        throw "No se pudo cargar el archivo JSON '$jsonFile': $($_.Exception.Message)"
+    }
+
+    if ($null -eq $json) {
+        throw "El archivo JSON '$jsonFile' no contiene configuración."
+    }
 
     return [PSCustomObject]@{
         SetupPath = $json.CSUSetupPath
         ChannelConfig = $json.CSUChannelConfig
         HttpPort = $json.CSUHttpPort
         RetailServerURL = $json.RetailServerURL
+        CPOSUrl = $json.CPOSUrl
         Thumbprint = $json.Thumbprint
         RetailServerAadClientId = $json.RetailServerAadClientId
         CposAadClientId = $json.CposAadClientId
